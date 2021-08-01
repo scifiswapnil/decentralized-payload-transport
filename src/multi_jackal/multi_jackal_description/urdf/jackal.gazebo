@@ -10,7 +10,7 @@
     <plugin name="imu_controller" filename="libhector_gazebo_ros_imu.so">
       <robotNamespace>/$(arg namespace)</robotNamespace>
       <updateRate>50.0</updateRate>
-      <bodyName>imu_link</bodyName>
+      <bodyName>$(arg namespace)/imu_link</bodyName>
       <topicName>imu/data</topicName>
       <frameId>$(arg namespace)/base_link</frameId>
       <accelDrift>0.00 0.00 0.00</accelDrift>
@@ -26,7 +26,7 @@
     <plugin name="gps_controller" filename="libhector_gazebo_ros_gps.so">
       <robotNamespace>/$(arg namespace)</robotNamespace>
       <updateRate>$(arg gps_rate)</updateRate>
-      <bodyName>navsat_link</bodyName>
+      <bodyName>$(arg namespace)/navsat_link</bodyName>
       <frameId>$(arg namespace)/base_link</frameId>    
       <topicName>navsat/fix</topicName>
       <velocityTopicName>navsat/vel</velocityTopicName>
@@ -40,25 +40,24 @@
     </plugin>
   </gazebo>
 
-  <gazebo reference="base_link">
+  <gazebo reference="$(arg namespace)/base_link">
     <turnGravityOff>false</turnGravityOff>
   </gazebo>
 
-  <gazebo reference="chassis_link">
+  <gazebo reference="$(arg namespace)/chassis_link">
     <material>Gazebo/DarkGrey</material>
     <turnGravityOff>false</turnGravityOff>
   </gazebo>
-    <gazebo reference="imu_link">
+    <gazebo reference="$(arg namespace)/imu_link">
     <turnGravityOff>false</turnGravityOff>
   </gazebo>
 
-  <gazebo reference="navsat_link">
+  <gazebo reference="$(arg namespace)/navsat_link">
     <material>Gazebo/DarkGrey</material>
     <turnGravityOff>false</turnGravityOff>
   </gazebo>
-  <gazebo reference="fenders_link">
+  <gazebo reference="$(arg namespace)/fenders_link">
     <material>Gazebo/Yellow</material>
     <turnGravityOff>false</turnGravityOff>
   </gazebo>
-  
 </robot>

@@ -50,7 +50,7 @@
       <material>Gazebo/DarkGrey</material>
     </gazebo>
     <joint name="${prefix}_wheel" type="continuous">
-      <parent link="chassis_link"/>
+      <parent link="$(arg namespace)/chassis_link"/>
       <child link="${prefix}_wheel_link" />
       <xacro:insert_block name="joint_pose" />
       <axis xyz="0 1 0" />
@@ -69,28 +69,28 @@
   </xacro:macro>
 
   <!-- The joints and links. -->
-  <xacro:wheel prefix="front_left">
+  <xacro:wheel prefix="$(arg namespace)/front_left">
     <origin xyz="${wheelbase/2} ${track/2} ${wheel_vertical_offset}" rpy="0 0 0" />
   </xacro:wheel>
-  <xacro:wheel prefix="front_right">
+  <xacro:wheel prefix="$(arg namespace)/front_right">
     <origin xyz="${wheelbase/2} ${-track/2} ${wheel_vertical_offset}" rpy="0 0 0" />
   </xacro:wheel>
-  <xacro:wheel prefix="rear_left">
+  <xacro:wheel prefix="$(arg namespace)/rear_left">
     <origin xyz="${-wheelbase/2} ${track/2} ${wheel_vertical_offset}" rpy="0 0 0" />
   </xacro:wheel>
-  <xacro:wheel prefix="rear_right">
+  <xacro:wheel prefix="$(arg namespace)/rear_right">
     <origin xyz="${-wheelbase/2} ${-track/2} ${wheel_vertical_offset}" rpy="0 0 0" />
   </xacro:wheel>
 
-  <link name="base_link"></link>
+  <link name="$(arg namespace)/base_link"></link>
 
-  <joint name="base_link_joint" type="fixed">
+  <joint name="$(arg namespace)/base_link_joint" type="fixed">
     <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="base_link"/>
-    <child link="chassis_link" />
+    <parent link="$(arg namespace)/base_link"/>
+    <child link="$(arg namespace)/chassis_link" />
   </joint>
 
-  <link name="chassis_link">
+  <link name="$(arg namespace)/chassis_link">
     <visual>
       <origin xyz="0 0 ${footprint_vertical_offset}" rpy="${PI/2} 0 ${PI/2}"/>
       <geometry>
@@ -116,7 +116,7 @@
       </inertial>
   </link>
 
-  <link name="fenders_link">
+  <link name="$(arg namespace)/fenders_link">
     <visual>
       <origin xyz="0 0 ${footprint_vertical_offset}" rpy="${PI/2} 0 ${PI/2}"/>
       <geometry>
@@ -125,29 +125,29 @@
       <material name="yellow" />
     </visual>
   </link>
-  <joint name="fenders_joint" type="fixed">
-    <parent link="chassis_link" />
-    <child link="fenders_link" />
+  <joint name="$(arg namespace)/fenders_joint" type="fixed">
+    <parent link="$(arg namespace)/chassis_link" />
+    <child link="$(arg namespace)/fenders_link" />
   </joint>
 
   <!-- TODO: Make this internal_imu_link or something, and use a mixed-in xacro
        to supply the joint between it and imu_link. This is important so that imu_link
        always points to the "active" IMU. When an upgrade IMU is connected, the
        internal_imu_link should remain, but imu_link should point to the upgrade one. -->
-  <link name="imu_link">
+  <link name="$(arg namespace)/imu_link">
     <inertial>
       <mass value="0.001"/>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <inertia ixx="${dummy_inertia}" ixy="0.0" ixz="0.0" iyy="${dummy_inertia}" iyz="0.0" izz="${dummy_inertia}"/>
     </inertial>
   </link>
-  <joint name="imu_joint" type="fixed">
-    <parent link="chassis_link" />
-    <child link="imu_link" />
+  <joint name="$(arg namespace)/imu_joint" type="fixed">
+    <parent link="$(arg namespace)/chassis_link" />
+    <child link="$(arg namespace)/imu_link" />
   </joint>
 
   <!-- TODO: Same note as applies to imu_link -->
-  <link name="navsat_link">
+  <link name="$(arg namespace)/navsat_link">
     <visual>
       <geometry>
         <cylinder radius="0.026" length="0.016" />
@@ -156,30 +156,30 @@
       <material name="black" />
     </visual>
   </link>
-  <joint name="navsat_joint" type="fixed">
-    <parent link="chassis_link" />
-    <child link="navsat_link" />
+  <joint name="$(arg namespace)/navsat_joint" type="fixed">
+    <parent link="$(arg namespace)/chassis_link" />
+    <child link="$(arg namespace)/navsat_link" />
     <origin xyz="-0.180 0.126 0.1815" />
   </joint>
 
-  <link name="mid_mount"></link>
-  <joint name="mid_mount_joint" type="fixed">
-    <parent link="chassis_link" />
-    <child link="mid_mount" />
+  <link name="$(arg namespace)/mid_mount"></link>
+  <joint name="$(arg namespace)/mid_mount_joint" type="fixed">
+    <parent link="$(arg namespace)/chassis_link" />
+    <child link="$(arg namespace)/mid_mount" />
     <origin xyz="0 0 ${chassis_height}" />
   </joint>
 
-  <link name="rear_mount"></link>
-  <joint name="rear_mount_joint" type="fixed">
-    <parent link="mid_mount" />
-    <child link="rear_mount" />
+  <link name="$(arg namespace)/rear_mount"></link>
+  <joint name="$(arg namespace)/rear_mount_joint" type="fixed">
+    <parent link="$(arg namespace)/mid_mount" />
+    <child link="$(arg namespace)/rear_mount" />
     <origin xyz="${-mount_spacing} 0 0" />
   </joint>
 
-  <link name="front_mount"></link>
-  <joint name="front_mount_joint" type="fixed">
-    <parent link="mid_mount" />
-    <child link="front_mount" />
+  <link name="$(arg namespace)/front_mount"></link>
+  <joint name="$(arg namespace)/front_mount_joint" type="fixed">
+    <parent link="$(arg namespace)/mid_mount" />
+    <child link="$(arg namespace)/front_mount" />
     <origin xyz="${mount_spacing} 0 0" />
   </joint>
   

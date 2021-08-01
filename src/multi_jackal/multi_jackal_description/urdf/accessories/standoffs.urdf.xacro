@@ -20,17 +20,17 @@
   </xacro:macro>
   
   <!-- Generate a set of four standoffs from a payload mount point. -->
-  <xacro:macro name="standoff_box" params="mount height">
-    <standoff name="${mount}_standoff0" length="${height}" parent="${mount}_mount">
+  <xacro:macro name="$(arg namespace)/standoff_box" params="mount height">
+    <standoff name="$(arg namespace)/${mount}_standoff0" length="${height}" parent="$(arg namespace)/${mount}_mount">
       <origin xyz="0.060 0.060 0" rpy="0 0 0"/>
     </standoff>
-    <standoff name="${mount}_standoff1" length="${height}" parent="${mount}_mount">
+    <standoff name="$(arg namespace)/${mount}_standoff1" length="${height}" parent="$(arg namespace)/${mount}_mount">
       <origin xyz="0.060 -0.060 0" rpy="0 0 0"/>
     </standoff>
-    <standoff name="${mount}_standoff2" length="${height}" parent="${mount}_mount">
+    <standoff name="$(arg namespace)/${mount}_standoff2" length="${height}" parent="$(arg namespace)/${mount}_mount">
       <origin xyz="-0.060 0.060 0" rpy="0 0 0"/>
     </standoff>
-    <standoff name="${mount}_standoff3" length="${height}" parent="${mount}_mount">
+    <standoff name="$(arg namespace)/${mount}_standoff3" length="${height}" parent="$(arg namespace)/${mount}_mount">
       <origin xyz="-0.060 -0.060 0" rpy="0 0 0"/>
     </standoff>
   </xacro:macro>

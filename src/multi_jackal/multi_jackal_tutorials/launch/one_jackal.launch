@@ -14,11 +14,11 @@
 
 <launch>
   <arg name="ns"        default="jackal0"/>
-  <arg name="config"    default="base"/>
+  <arg name="config"    default="sheffield_robots"/>
   <arg name="config_id" default="0"/>
   <arg name="world"     default="empty.world"/>
-  <arg name="gui"       default="false"/>
-  <arg name="rviz"      default="false"/>
+  <arg name="gui"       default="true"/>
+  <arg name="rviz"      default="true"/>
 
   <!-- Start Gazebo. -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -32,9 +32,22 @@
     <arg name="ns"            value="$(arg ns)"/>
     <arg name="config"        value="$(arg config)"/>
     <arg name="config_id"     value="$(arg config_id)"/>
-    <arg name="use_move_base" value="true"/>
+    <arg name="use_move_base" value="false"/>
+  </include>
+
+  <include file="$(find multi_jackal_base)/launch/jackal_base.launch">
+    <arg name="ns"            value="jackal1"/>
+    <arg name="config"        value="sheffield_robots"/>
+    <arg name="config_id"     value="1"/>
+    <arg name="use_move_base" value="false"/>
+    <arg name="x"         default="2"/>
   </include>
   
+  <rosparam param="jackal0/jackal_velocity_controller/left_wheel" >[jackal0/front_left_wheel, jackal0/rear_left_wheel] </rosparam>
+  <rosparam param="jackal0/jackal_velocity_controller/right_wheel" >[jackal0/front_right_wheel, jackal0/rear_right_wheel]</rosparam>
+  <rosparam param="jackal1/jackal_velocity_controller/left_wheel" >[jackal1/front_left_wheel, jackal1/rear_left_wheel] </rosparam>
+  <rosparam param="jackal1/jackal_velocity_controller/right_wheel" >[jackal1/front_right_wheel, jackal1/rear_right_wheel]</rosparam>
+
   <!-- View in RVIZ. -->
   <group if="$(arg rviz)">
     <node name="rviz" pkg="rviz" type="rviz" ns="$(arg ns)" args="-d $(find multi_jackal_tutorials)/rviz/one_jackal.rviz" >
