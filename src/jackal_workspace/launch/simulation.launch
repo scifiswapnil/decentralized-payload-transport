@@ -3,7 +3,7 @@
 
 MIT License Agreement
 
-Description of the base link for the robot platform.
+Description of the jackal workspace for the multi-agent payload transport project.
 
 \authors Swapnil Kalhapure <kalhapure.swapnil@gmail.com>
 
@@ -16,26 +16,7 @@ Description of the base link for the robot platform.
     <arg name="load_map" default="true" />
     <arg name="rviz" default="true" />
     <arg name="headless" default="false" />
-    <arg name="world_name" default="$(find jackal_sim)/world/stage_one.world" />
-
-    <!-- Short-term hack to support the original front_laser:=true argument for spawning
-         the simulator. This will be removed in favour of using the config:=x arg instead. -->
-    <arg name="front_laser" default="true" />
-    <arg name="default_config" value="front_laser" if="$(arg front_laser)" />
-    <arg name="default_config" value="base" unless="$(arg front_laser)" />
-    <!-- end of hack -->
-
-    <!-- Configuration of Jackal which you would like to simulate.
-         See jackal_description for details. -->
-    <arg name="config" default="$(arg default_config)" />
-
-    <!-- Optionally enable teleop for the simulation -->
-    <arg name="joystick" default="false" />
-    <arg name="ds4" default="true" />
-    <include file="$(find jackal_sim)/launch/teleop_control.launch">
-        <arg name="joystick" value="$(arg joystick)" />
-        <arg name="ds4" value="$(arg ds4)" />
-    </include>
+    <arg name="world_name" default="$(find jackal_workspace)/world/stage_one.world" />
 
     <!-- Launch Gazebo with the specified world -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -46,26 +27,37 @@ Description of the base link for the robot platform.
         <arg name="world_name" value="$(arg world_name)" />
     </include>
 
-    <!-- Spawn Jackal -->
-    <include file="$(find jackal_gazebo)/launch/spawn_jackal.launch">
-        <arg name="x" value="0" />
-        <arg name="y" value="0" />
-        <arg name="z" value="1.0" />
-        <arg name="yaw" value="0" />
-        <arg name="config" value="$(arg config)" />
-        <arg name="joystick" value="$(arg joystick)" />
+    <!-- Spawn the robots. -->
+    <include file="$(find multi_jackal_base)/launch/jackal_base.launch">
+        <arg name="ns" value="jackal0" />
+        <arg name="config" value="sheffield_robots" />
+        <arg name="config_id" value="0" />
+        <arg name="use_move_base" value="false" />
+    </include>
+    
+    <include file="$(find multi_jackal_base)/launch/jackal_base.launch">
+        <arg name="ns" value="jackal1" />
+        <arg name="config" value="sheffield_robots" />
+        <arg name="config_id" value="1" />
+        <arg name="use_move_base" value="false" />
+        <arg name="y" value="-2" />
     </include>
 
     <!-- View in RVIZ. -->
     <group if="$(arg rviz)">
-        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find jackal_sim)/rviz/rviz.rviz">
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find jackal_workspace)/rviz/rviz.rviz">
             <!-- <remap from="/move_base_simple/goal" to="/$(arg ns)/move_base_simple/goal" /> -->
         </node>
     </group>
 
+    <rosparam param="jackal0/jackal_velocity_controller/left_wheel" >[jackal0/front_left_wheel, jackal0/rear_left_wheel] </rosparam>
+    <rosparam param="jackal0/jackal_velocity_controller/right_wheel" >[jackal0/front_right_wheel, jackal0/rear_right_wheel]</rosparam>
+    <rosparam param="jackal1/jackal_velocity_controller/left_wheel" >[jackal1/front_left_wheel, jackal1/rear_left_wheel] </rosparam>
+    <rosparam param="jackal1/jackal_velocity_controller/right_wheel" >[jackal1/front_right_wheel, jackal1/rear_right_wheel]</rosparam>
+
     <!-- View in RVIZ. -->
     <group if="$(arg load_map)">
-        <node name="map_server" pkg="map_server" type="map_server" args="$(find jackal_sim)/map/stage_one.yaml" /> 
-        <node name="static_tf_pub" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 1 /map /odom 50" output="screen"/>
+        <node name="map_server" pkg="map_server" type="map_server" args="$(find jackal_workspace)/map/stage_one.yaml" />
+        <!-- <node name="static_tf_pub" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 1 /map /odom 50" output="screen" /> -->
     </group>
 </launch>
