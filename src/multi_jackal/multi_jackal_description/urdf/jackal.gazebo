@@ -60,4 +60,40 @@
     <material>Gazebo/Yellow</material>
     <turnGravityOff>false</turnGravityOff>
   </gazebo>
+
+
+  <gazebo reference="$(arg namespace)/laser">
+    <sensor type="ray" name="head_laser_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>40</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>1875</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14</min_angle>
+            <max_angle>3.14</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.3</min>
+          <max>130.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.0</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
+        <robotNamespace>/$(arg namespace)</robotNamespace>
+        <topicName>laser/scan</topicName>
+        <frameName>$(arg namespace)/laser</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  
 </robot>
