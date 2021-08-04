@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+
+MIT License Agreement
+
+Description of the jackal workspace for the multi-agent payload transport project.
+
+\authors Swapnil Kalhapure <kalhapure.swapnil@gmail.com>
+
+\maintainer Swapnil Kalhapure <kalhapure.swapnil@gmail.com>
+
+-->
+<launch>
+    <node pkg="rf2o_laser_odometry" type="rf2o_laser_odometry_node" name="rf2o_laser_odometry" output="screen">
+        <param name="laser_scan_topic" value="/scan" />
+        <param name="odom_topic" value="rf2o_odom" />
+        <param name="publish_tf" value="false" />
+        <param name="base_frame_id" value="base_link" />
+        <param name="odom_frame_id" value="odom" />
+        <param name="init_pose_from_topic" value="" />
+        <param name="freq" value="5.0" />
+        <param name="verbose" value="false" />
+    </node>
+</launch>

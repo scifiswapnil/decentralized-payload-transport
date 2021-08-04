@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<package>
+	<name>shef04_jackal</name>
+	<version>0.0.0</version>
+	<description>Custom repository for the SHEF04 Jackals. This project consists of 4 Jackals, 3 of which come with a VLP16, Flea3 Camera, NovAtel GPS, Microhard PX2, and Microstrain GX5-25. One Jackal has only a Microhard.</description>
+	<maintainer email="code@clearpathrobotics.com">Clearpath Team</maintainer>
+	<license>BSD</license>
+	<buildtool_depend>catkin</buildtool_depend>
+	<run_depend>jackal_bringup</run_depend>
+	<run_depend>jackal_description</run_depend>
+</package>
+

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+
+MIT License Agreement
+
+Description of the jackal workspace for the multi-agent payload transport project.
+
+\authors Swapnil Kalhapure <kalhapure.swapnil@gmail.com>
+
+\maintainer Swapnil Kalhapure <kalhapure.swapnil@gmail.com>
+
+-->
+<launch>
+
+    <node name="velocity_odom_to_path" pkg="jackal_workspace" type="odom_to_path.py" output="screen">
+        <remap from="odom" to="/jackal_velocity_controller/odom" />
+        <remap from="path" to="/velocity_path" />
+        <param name="max_list_append" value="100"/>
+        
+    </node>
+
+    <node name="filtered_odom_to_path" pkg="jackal_workspace" type="odom_to_path.py" output="screen">
+        <remap from="odom" to="/odometry/filtered" />
+        <remap from="path" to="/filtered_path" />
+        <param name="max_list_append" value="100"/>
+    </node>
+
+    <node name="rf2o_odom_to_path" pkg="jackal_workspace" type="odom_to_path.py" output="screen">
+        <remap from="odom" to="/rf2o_odom" />
+        <remap from="path" to="/2d_laser_path" />
+        <param name="max_list_append" value="100"/>
+    </node>
+
+    <node pkg="rviz" type="rviz" name="odom_rviz" args="-d $(find jackal_workspace)/rviz/odom_plot.rviz" />
+
+</launch>
