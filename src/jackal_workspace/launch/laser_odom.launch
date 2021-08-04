@@ -3,7 +3,7 @@
 
 MIT License Agreement
 
-Description of the base link for the robot platform.
+Description of the jackal workspace for the multi-agent payload transport project.
 
 \authors Swapnil Kalhapure <kalhapure.swapnil@gmail.com>
 
@@ -11,7 +11,6 @@ Description of the base link for the robot platform.
 
 -->
 <launch>
-
     <node pkg="rf2o_laser_odometry" type="rf2o_laser_odometry_node" name="rf2o_laser_odometry" output="screen">
         <param name="laser_scan_topic" value="/scan" />
         <param name="odom_topic" value="rf2o_odom" />
@@ -22,6 +21,4 @@ Description of the base link for the robot platform.
         <param name="freq" value="5.0" />
         <param name="verbose" value="false" />
     </node>
-
-
 </launch>
