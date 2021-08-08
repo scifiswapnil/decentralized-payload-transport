@@ -19,6 +19,6 @@ Description of the jackal workspace for the multi-agent payload transport projec
         <param name="odom_frame_id" value="odom" />
         <param name="init_pose_from_topic" value="" />
         <param name="freq" value="5.0" />
-        <param name="verbose" value="false" />
+        <param name="verbose" value="true" />
     </node>
 </launch>

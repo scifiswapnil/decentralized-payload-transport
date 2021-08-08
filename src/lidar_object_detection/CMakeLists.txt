@@ -3,12 +3,15 @@ project(lidar_object_detection)
 
 add_compile_options(-std=c++14)
 
+find_package(PCL REQUIRED)
+
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   pcl_ros
   roscpp
   rospy
   sensor_msgs
+  dynamic_reconfigure
   std_msgs
 )
 
@@ -66,10 +69,9 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   geometry_msgs#   sensor_msgs#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES geometry_msgs sensor_msgs std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -86,10 +88,9 @@ find_package(catkin REQUIRED COMPONENTS
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+generate_dynamic_reconfigure_options(
+  cfg/lidar_detection.cfg
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -103,7 +104,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES lidar_object_detection
-#  CATKIN_DEPENDS geometry_msgs pcl_ros roscpp rospy sensor_msgs std_msgs
+ CATKIN_DEPENDS geometry_msgs pcl_ros roscpp rospy sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -116,8 +117,11 @@ catkin_package(
 include_directories(
   include/lidar_object_detection
   ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
 )
 
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/lidar_object_detection.cpp
@@ -149,7 +153,7 @@ include_directories(
 # )
 
 add_executable(detection src/detection.cpp)
-target_link_libraries(detection ${catkin_LIBRARIES})
+target_link_libraries(detection ${PCL_LIBRARIES} ${catkin_LIBRARIES} )
 
 #############
 ## Install ##

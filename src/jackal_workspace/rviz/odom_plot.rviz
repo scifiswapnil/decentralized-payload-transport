@@ -24,7 +24,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -121,7 +121,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz/Path
       Color: 204; 0; 0
-      Enabled: false
+      Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -140,7 +140,7 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /filtered_path
       Unreliable: false
-      Value: false
+      Value: true
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
@@ -226,7 +226,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 67.47274780273438
+      Scale: 246.7366180419922
       Target Frame: <Fixed Frame>
       X: 0.26740002632141113
       Y: -0.07009240984916687
@@ -248,4 +248,4 @@ Window Geometry:
     collapsed: false
   Width: 1920
   X: 0
-  Y: 1107
+  Y: 27

@@ -33,9 +33,11 @@ Description of the jackal workspace for the multi-agent payload transport projec
         <arg name="config" value="sheffield_robots" />
         <arg name="config_id" value="0" />
         <arg name="use_move_base" value="false" />
-        <arg name="use_global_tf"  value="true"/>
+        <arg name="use_global_tf" value="true" />
+        <arg name="x" value="0.15" />
+        <arg name="y" value="0.55" />
     </include>
-    
+
     <!-- <include file="$(find multi_jackal_base)/launch/jackal_base.launch">
         <arg name="ns" value="jackal2" />
         <arg name="config" value="sheffield_robots" />
@@ -45,10 +47,10 @@ Description of the jackal workspace for the multi-agent payload transport projec
         <arg name="use_global_tf"  value="true"/>
     </include> -->
 
-      <!-- keyboard controller -->
-  <node name="robot0_teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen" launch-prefix="xterm -e">
-    <remap to="/jackal0/jackal_velocity_controller/cmd_vel" from="cmd_vel" />
-  </node>
+    <!-- keyboard controller -->
+    <node name="robot0_teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen" launch-prefix="xterm -e">
+        <remap to="/jackal0/jackal_velocity_controller/cmd_vel" from="cmd_vel" />
+    </node>
 
     <!-- View in RVIZ. -->
     <group if="$(arg rviz)">
@@ -57,14 +59,17 @@ Description of the jackal workspace for the multi-agent payload transport projec
         </node>
     </group>
 
-    <rosparam param="jackal0/jackal_velocity_controller/left_wheel" >[jackal0/front_left_wheel, jackal0/rear_left_wheel] </rosparam>
-    <rosparam param="jackal0/jackal_velocity_controller/right_wheel" >[jackal0/front_right_wheel, jackal0/rear_right_wheel]</rosparam>
-    <rosparam param="jackal2/jackal_velocity_controller/left_wheel" >[jackal2/front_left_wheel, jackal2/rear_left_wheel] </rosparam>
-    <rosparam param="jackal2/jackal_velocity_controller/right_wheel" >[jackal2/front_right_wheel, jackal2/rear_right_wheel]</rosparam>
+    <rosparam param="jackal0/jackal_velocity_controller/left_wheel">[jackal0/front_left_wheel, jackal0/rear_left_wheel] </rosparam>
+    <rosparam param="jackal0/jackal_velocity_controller/right_wheel">[jackal0/front_right_wheel, jackal0/rear_right_wheel]</rosparam>
 
     <!-- View in RVIZ. -->
     <group if="$(arg load_map)">
         <node name="map_server" pkg="map_server" type="map_server" args="$(find jackal_workspace)/map/stage_two.yaml" />
         <!-- <node name="static_tf_pub" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 1 /map /odom 50" output="screen" /> -->
     </group>
+
+
+    <param name="robot_description" command="$(find xacro)/xacro  $(find jackal_workspace)/urdf/pallet.urdf.xacro --inorder" />
+
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-urdf -model pallet -param robot_description -x -1.25 -y 0 -z 0.05 -R 0 -P 0 -Y 0" />
 </launch>

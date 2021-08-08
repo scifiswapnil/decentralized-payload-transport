@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!--
+
+MIT License Agreement
+
+Description of the jackal workspace for the multi-agent payload transport project.
+
+\authors Swapnil Kalhapure <kalhapure.swapnil@gmail.com>
+
+\maintainer Swapnil Kalhapure <kalhapure.swapnil@gmail.com>
+
+-->
+<launch>
+
+    <include file="$(find multi_jackal_base)/launch/jackal_base.launch">
+        <arg name="ns" value="jackal2" />
+        <arg name="config" value="sheffield_robots" />
+        <arg name="config_id" value="1" />
+        <arg name="use_move_base" value="false" />
+        <arg name="x" value="0.15" />
+        <arg name="y" value="-0.55" />
+        <arg name="use_global_tf" value="true" />
+    </include>
+
+    <!-- keyboard controller -->
+    <node name="robot2_teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen" launch-prefix="xterm -e">
+        <remap to="/jackal2/jackal_velocity_controller/cmd_vel" from="cmd_vel" />
+    </node>
+
+    <rosparam param="jackal2/jackal_velocity_controller/left_wheel">[jackal2/front_left_wheel, jackal2/rear_left_wheel] </rosparam>
+    <rosparam param="jackal2/jackal_velocity_controller/right_wheel">[jackal2/front_right_wheel, jackal2/rear_right_wheel]</rosparam>
+
+</launch>
