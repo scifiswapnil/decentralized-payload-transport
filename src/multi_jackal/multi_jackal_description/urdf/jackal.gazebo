@@ -9,7 +9,7 @@
   <gazebo>
     <plugin name="imu_controller" filename="libhector_gazebo_ros_imu.so">
       <robotNamespace>/$(arg namespace)</robotNamespace>
-      <updateRate>50.0</updateRate>
+      <updateRate>5.0</updateRate>
       <bodyName>$(arg namespace)/imu_link</bodyName>
       <topicName>imu/data</topicName>
       <frameId>$(arg namespace)/base_link</frameId>
@@ -62,11 +62,11 @@
   </gazebo>
 
 
-  <gazebo reference="$(arg namespace)/laser">
+  <!-- <gazebo reference="$(arg namespace)/laser">
     <sensor type="ray" name="head_laser_sensor">
       <pose>0 0 0 0 0 0</pose>
       <visualize>false</visualize>
-      <update_rate>40</update_rate>
+      <update_rate>20</update_rate>
       <ray>
         <scan>
           <horizontal>
@@ -87,13 +87,13 @@
           <stddev>0.0</stddev>
         </noise>
       </ray>
-      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
+      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_gpu_laser.so">
         <robotNamespace>/$(arg namespace)</robotNamespace>
         <topicName>laser/scan</topicName>
         <frameName>$(arg namespace)/laser</frameName>
       </plugin>
     </sensor>
-  </gazebo>
+  </gazebo> -->
 
   
 </robot>

@@ -19,7 +19,7 @@
   <arg name="odom_frame" default="$(arg ns)/odom" />
   <arg name="base_frame" default="$(arg ns)/base_link" />
   <arg name="laser_scan_matcher" default="false" />
-  <arg name="rf2o" default="true" />
+  <arg name="rf2o" default="false" />
 
   <!-- Robot localisation, takes IMU and wheel odometry to form a single localisation
        estimate. This is the local filter, providing the odom to base_link transformation. -->

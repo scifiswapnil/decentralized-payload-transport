@@ -16,8 +16,8 @@ req.link_name_2 = "connector_bar_one"
 attach_srv.call(req)
 
 req = AttachRequest()
-req.model_name_1 = "jackal2"
-req.link_name_1 = "jackal2/base_link"
+req.model_name_1 = "jackal1"
+req.link_name_1 = "jackal1/base_link"
 req.model_name_2 = "pallet"
 req.link_name_2 = "connector_bar_two"
 attach_srv.call(req)

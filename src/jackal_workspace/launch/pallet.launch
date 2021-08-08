@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+
+MIT License Agreement
+
+Description of the jackal workspace for the multi-agent payload transport project.
+
+\authors Swapnil Kalhapure <kalhapure.swapnil@gmail.com>
+
+\maintainer Swapnil Kalhapure <kalhapure.swapnil@gmail.com>
+
+-->
+<launch>
+
+    <param name="robot_description" command="$(find xacro)/xacro  $(find jackal_workspace)/urdf/pallet.urdf.xacro --inorder" />
+
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-urdf -model pallet -param robot_description -x -1.25 -y 0 -z 0.05 -R 0 -P 0 -Y 0" />
+
+
+</launch>

@@ -1,12 +1,12 @@
 jackal_joint_publisher:
   type: "joint_state_controller/JointStateController"
-  publish_rate: 50
+  publish_rate: 30
 
 jackal_velocity_controller:
   type: "diff_drive_controller/DiffDriveController"
   # left_wheel: ['jackal0/front_left_wheel', 'jackal0/rear_left_wheel']
   # right_wheel: ['jackal0/front_right_wheel', 'jackal0/rear_right_wheel']
-  publish_rate: 50
+  publish_rate: 30
   pose_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 0.03]
   twist_covariance_diagonal: [0.001, 0.001, 0.001, 1000000.0, 1000000.0, 0.03]
   cmd_vel_timeout: 0.25
