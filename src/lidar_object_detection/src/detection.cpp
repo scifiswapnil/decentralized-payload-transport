@@ -4,7 +4,7 @@ double x_positive = +1.0;
 double x_negative = -1.0;
 double y_positive = +1.0;
 double y_negative = -1.0;
-double min_intensity = 110;
+double min_intensity = 150;
 double max_intensity = 3000;
 double sor_meanK = 10.0;
 double sor_StddevMulThresh = 1.0;
@@ -15,6 +15,8 @@ double ClusterNumberOfNeighbours = 20.0;
 double SACDistanceThreshold = 0.03;
 
 ros::Publisher processed_cloud_publisher, primary_filter_publisher, marker_publisher;
+pcl::PointCloud<pcl::PointXYZI>::Ptr save_cloud(new pcl::PointCloud<pcl::PointXYZI>);
+int file_pcd_count = 0;
 
 visualization_msgs::Marker create_marker(pcl::PointXYZI center)
 {
@@ -45,10 +47,11 @@ visualization_msgs::Marker create_marker(pcl::PointXYZI center)
 
 void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
 {
-  pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZI>);
   sensor_msgs::PointCloud2 output;
+  pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZI>);
 
   pcl::fromROSMsg(*cloud_msg, *input_cloud);
+  pcl::fromROSMsg(*cloud_msg, *save_cloud);
 
   pcl::PassThrough<pcl::PointXYZI> x_pass, y_pass, i_pass;
   try
@@ -112,18 +115,31 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
   filtered_cloud->width = input_cloud->width;
   filtered_cloud->height = input_cloud->height;
   filtered_cloud->header = input_cloud->header;
-  filtered_cloud->points.resize(filtered_cloud->width*filtered_cloud->height);
+  filtered_cloud->points.resize(filtered_cloud->width * filtered_cloud->height);
 
-  // plane fitting
+  pcl::search::KdTree<pcl::PointXYZI>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZI>());
+  pcl::PointCloud<pcl::Normal>::Ptr cloud_normals(new pcl::PointCloud<pcl::Normal>);
+  pcl::ModelCoefficients::Ptr coefficients_plane(new pcl::ModelCoefficients);
   pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
-  pcl::SACSegmentation<pcl::PointXYZI> seg;
+  pcl::NormalEstimation<pcl::PointXYZI, pcl::Normal> ne;
+  pcl::SACSegmentationFromNormals<pcl::PointXYZI, pcl::Normal> seg;
+
+  // Estimate point normals
+  ne.setSearchMethod(tree);
+  ne.setInputCloud(input_cloud);
+  ne.setKSearch(40);
+  ne.compute(*cloud_normals);
+
   seg.setOptimizeCoefficients(true);
-  seg.setModelType(pcl::SACMODEL_PLANE);
+  seg.setModelType(pcl::SACMODEL_NORMAL_PLANE);
+  seg.setNormalDistanceWeight(0.05);
   seg.setMethodType(pcl::SAC_RANSAC);
-  seg.setDistanceThreshold(SACDistanceThreshold);
+  seg.setMaxIterations(100);
+  seg.setDistanceThreshold(0.02);
   seg.setInputCloud(input_cloud);
-  seg.segment(*inliers, *coefficients);
+  seg.setInputNormals(cloud_normals);
+  seg.segment(*inliers, *coefficients_plane);
 
   if (inliers->indices.size() == 0)
   {
@@ -134,43 +150,34 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
   for (const auto &idx : inliers->indices)
     filtered_cloud->points[idx] = input_cloud->points[idx];
 
-  // clustering
-  pcl::search::Search<pcl::PointXYZI>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZI>);
-  pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-  pcl::NormalEstimation<pcl::PointXYZI, pcl::Normal> normal_estimator;
-  normal_estimator.setSearchMethod(tree);
-  normal_estimator.setInputCloud(input_cloud);
-  normal_estimator.setKSearch(normal_esitmator_KSearch);
-  normal_estimator.compute(*normals);
+  // pcl::RegionGrowing<pcl::PointXYZI, pcl::Normal> reg;
+  // reg.setMinClusterSize(ClusterMinSize);
+  // reg.setMaxClusterSize(ClusterMaxSize);
+  // reg.setSearchMethod(tree);
+  // reg.setNumberOfNeighbours(ClusterNumberOfNeighbours);
+  // reg.setInputCloud(filtered_cloud);
+  // reg.setInputNormals(cloud_normals);
+  // reg.setSmoothnessThreshold(1.0 / 180.0 * M_PI);
+  // reg.setCurvatureThreshold(1.0);
+  // std::vector<pcl::PointIndices> clusters;
+  // reg.extract(clusters);
 
-  pcl::RegionGrowing<pcl::PointXYZI, pcl::Normal> reg;
-  reg.setMinClusterSize(ClusterMinSize);
-  reg.setMaxClusterSize(ClusterMaxSize);
-  reg.setSearchMethod(tree);
-  reg.setNumberOfNeighbours(ClusterNumberOfNeighbours);
-  reg.setInputCloud(input_cloud);
-  reg.setInputNormals(normals);
-  reg.setSmoothnessThreshold(1.0 / 180.0 * M_PI);
-  reg.setCurvatureThreshold(1.0);
+  // // processed cloud formation
+  // pcl::PointCloud<pcl::PointXYZI>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZI>);
+  // filtered->width = input_cloud->width;
+  // filtered->height = input_cloud->height;
+  // filtered->header = input_cloud->header;
+  // filtered->points.resize(filtered->width * filtered->height);
 
-  std::vector<pcl::PointIndices> clusters;
-  reg.extract(clusters);
-  std::cout << "Number of clusters :" << clusters.size() << std::endl;
-  // filtered_cloud = reg.getColoredCloud();
-  if (clusters.size() != 0)
-  {
-    for (int i = 0; i < clusters.size(); i++)
-    {
-      std::cout << "cluster : " << i << " points : " << clusters[i].indices.size() << std::endl;
-    }
-  }
+  // for (const auto &idx : clusters[0].indices)
+  //   filtered->points[idx] = input_cloud->points[idx];
 
   pcl::PointXYZI center;
   pcl::CentroidPoint<pcl::PointXYZI> centroid;
   for (int j = 0; j < filtered_cloud->points.size(); j++)
   {
     auto point = filtered_cloud->points[j];
-    if (point.x != 0.0 && point.y != 0.0 && point.z != 0.0 )
+    if (point.x != 0.0 && point.y != 0.0 && point.z != 0.0)
       centroid.add(point);
   }
   centroid.get(center);
@@ -198,6 +205,14 @@ void callback(lidar_object_detection::parametersConfig &config, uint32_t level)
   SACDistanceThreshold = config.SACDistanceThreshold;
 }
 
+bool save(std_srvs::Empty::Request &req,
+          std_srvs::Empty::Response &res)
+{
+  file_pcd_count++;
+  pcl::io::savePCDFileASCII("file_" + std::to_string(file_pcd_count) + ".pcd", *save_cloud);
+  return true;
+}
+
 int main(int argc, char **argv)
 {
   // Initialize ROS
@@ -214,6 +229,8 @@ int main(int argc, char **argv)
   processed_cloud_publisher = nh.advertise<sensor_msgs::PointCloud2>("output", 1);
   primary_filter_publisher = nh.advertise<sensor_msgs::PointCloud2>("primary_output", 1);
   marker_publisher = nh.advertise<visualization_msgs::Marker>("pallet_centroid", 1);
+
+  ros::ServiceServer service = nh.advertiseService("save_point_cloud", save);
 
   // Spin
   ros::spin();

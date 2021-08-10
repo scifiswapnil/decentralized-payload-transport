@@ -29,6 +29,9 @@
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/segmentation/region_growing.h>
+#include <std_srvs/Empty.h>
+#include <string.h>
+#include <pcl/io/pcd_io.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <lidar_object_detection/parametersConfig.h>

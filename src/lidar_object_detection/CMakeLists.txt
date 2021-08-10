@@ -155,6 +155,9 @@ add_definitions(${PCL_DEFINITIONS})
 add_executable(detection src/detection.cpp)
 target_link_libraries(detection ${PCL_LIBRARIES} ${catkin_LIBRARIES} )
 
+add_executable(fit src/fitting.cpp)
+target_link_libraries(fit ${PCL_LIBRARIES} ${catkin_LIBRARIES} )
+
 #############
 ## Install ##
 #############
