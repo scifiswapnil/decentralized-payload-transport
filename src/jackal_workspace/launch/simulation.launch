@@ -12,7 +12,7 @@ Description of the jackal workspace for the multi-agent payload transport projec
 -->
 <launch>
     <arg name="use_sim_time" default="true" />
-    <arg name="gui" default="true" />
+    <arg name="gui" default="false" />
     <arg name="load_map" default="true" />
     <arg name="rviz" default="true" />
     <arg name="headless" default="false" />
@@ -35,8 +35,6 @@ Description of the jackal workspace for the multi-agent payload transport projec
         <arg name="ns" value="jackal0" />
         <arg name="config" value="sheffield_robots" />
         <arg name="config_id" value="0" />
-        <arg name="use_move_base" value="false" />
-        <arg name="use_global_tf" value="true" />
         <arg name="x" value="0.15" />
         <arg name="y" value="0.55" />
     </include>
@@ -57,7 +55,6 @@ Description of the jackal workspace for the multi-agent payload transport projec
     <!-- View in RVIZ. -->
     <group if="$(arg load_map)">
         <node name="map_server" pkg="map_server" type="map_server" args="$(find jackal_workspace)/map/stage_two.yaml" />
-        <!-- <node name="static_tf_pub" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 1 /map /odom 50" output="screen" /> -->
     </group>
 
 </launch>

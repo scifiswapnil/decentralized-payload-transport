@@ -16,5 +16,4 @@ Description of the jackal workspace for the multi-agent payload transport projec
 
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-urdf -model pallet -param robot_description -x -1.25 -y 0 -z 0.05 -R 0 -P 0 -Y 0" />
 
-
 </launch>
