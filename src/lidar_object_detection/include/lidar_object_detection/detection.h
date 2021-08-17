@@ -37,3 +37,4 @@
 #include <dynamic_reconfigure/server.h>
 #include <lidar_object_detection/parametersConfig.h>
 #include <pcl/features/moment_of_inertia_estimation.h>
+#include <geometry_msgs/PoseStamped.h>

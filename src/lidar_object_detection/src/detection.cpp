@@ -9,12 +9,11 @@ double max_intensity = 3000;
 double sor_meanK = 10.0;
 double sor_StddevMulThresh = 1.0;
 double normal_esitmator_KSearch = 50.0;
-double ClusterMinSize = 80.0;
-double ClusterMaxSize = 1000000.0;
-double ClusterNumberOfNeighbours = 20.0;
-double SACDistanceThreshold = 0.05;
+double SACDistanceThreshold = 0.07;
 
-ros::Publisher processed_cloud_publisher, primary_filter_publisher, marker_publisher,bot_publisher,markers_pub_,plane_filter_publisher,bot_filter_publisher;
+ros::Publisher primary_filter_publisher, processed_plane_cloud_publisher, processed_bot_cloud_publisher;
+ros::Publisher pallet_marker_publisher, bot_marker_pub, plane_marker_pub;
+ros::Publisher pallet_pose, agent_pose;
 pcl::PointCloud<pcl::PointXYZI>::Ptr save_cloud(new pcl::PointCloud<pcl::PointXYZI>);
 int file_pcd_count = 0;
 
@@ -107,30 +106,6 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
     std::cerr << "sor filter failed" << std::endl;
   }
 
-  pcl::search::KdTree<pcl::PointXYZI>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZI>());
-  // std::vector<pcl::PointIndices> cluster_indices;
-  // pcl::EuclideanClusterExtraction<pcl::PointXYZI> ec;
-  // ec.setClusterTolerance(SACDistanceThreshold); // 2cm
-  // ec.setMinClusterSize(ClusterMinSize);
-  // ec.setMaxClusterSize(ClusterMaxSize);
-  // ec.setSearchMethod(tree);
-  // ec.setInputCloud(input_cloud);
-  // ec.extract(cluster_indices);
-
-  // pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_cluster(new pcl::PointCloud<pcl::PointXYZI>);
-
-  // for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
-  // {
-  //   for (const auto &idx : it->indices)
-  //     cloud_cluster->push_back((*input_cloud)[idx]); //*
-  //   cloud_cluster->width = cloud_cluster->size();
-  //   cloud_cluster->height = 1;
-  //   cloud_cluster->is_dense = true;
-  //   std::cout << "PointCloud representing the Cluster: " << cloud_cluster->size() << " data points." << std::endl;
-  // }
-  // std::cout << "------------------" << std::endl;
-  // cloud_cluster->header = input_cloud->header;
-  
   pcl::toROSMsg(*input_cloud, output);
   primary_filter_publisher.publish(output);
 
@@ -142,6 +117,7 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
   filtered_cloud->points.resize(filtered_cloud->width * filtered_cloud->height);
 
   pcl::PointCloud<pcl::Normal>::Ptr cloud_normals(new pcl::PointCloud<pcl::Normal>);
+  pcl::search::KdTree<pcl::PointXYZI>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZI>());
   pcl::ModelCoefficients::Ptr coefficients_plane(new pcl::ModelCoefficients);
   pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
   pcl::NormalEstimation<pcl::PointXYZI, pcl::Normal> ne;
@@ -158,7 +134,7 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
   seg.setNormalDistanceWeight(0.05);
   seg.setMethodType(pcl::SAC_RANSAC);
   seg.setMaxIterations(100);
-  seg.setDistanceThreshold(0.05);
+  seg.setDistanceThreshold(SACDistanceThreshold);
   seg.setInputCloud(input_cloud);
   seg.setInputNormals(cloud_normals);
   seg.segment(*inliers, *coefficients_plane);
@@ -169,26 +145,26 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
     return;
   }
 
-  pcl::ExtractIndices<pcl::PointXYZI> extract,extract_neg;
-  extract.setInputCloud (input_cloud);
-  extract.setIndices (inliers);
-  extract.setNegative (false);
-  extract.filter (*filtered_cloud);
+  pcl::ExtractIndices<pcl::PointXYZI> extract, extract_neg;
+  extract.setInputCloud(input_cloud);
+  extract.setIndices(inliers);
+  extract.setNegative(false);
+  extract.filter(*filtered_cloud);
 
-    // processed cloud formation
+  // processed cloud formation
   pcl::PointCloud<pcl::PointXYZI>::Ptr filtered_cloud_bot(new pcl::PointCloud<pcl::PointXYZI>);
   filtered_cloud_bot->width = input_cloud->width;
   filtered_cloud_bot->height = input_cloud->height;
   filtered_cloud_bot->header = input_cloud->header;
   filtered_cloud_bot->points.resize(filtered_cloud_bot->width * filtered_cloud_bot->height);
 
-  extract_neg.setInputCloud (input_cloud);
-  extract_neg.setIndices (inliers);
-  extract_neg.setNegative (true);
-  extract_neg.filter (*filtered_cloud_bot);
+  extract_neg.setInputCloud(input_cloud);
+  extract_neg.setIndices(inliers);
+  extract_neg.setNegative(true);
+  extract_neg.filter(*filtered_cloud_bot);
 
-  pcl::PointXYZI center,center1;
-  pcl::CentroidPoint<pcl::PointXYZI> centroid,centroid1;
+  pcl::PointXYZI center, center1;
+  pcl::CentroidPoint<pcl::PointXYZI> centroid, centroid1;
 
   for (int j = 0; j < filtered_cloud->points.size(); j++)
   {
@@ -197,7 +173,6 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
       centroid.add(point);
   }
   centroid.get(center);
-  marker_publisher.publish(create_marker(center));
 
   for (int j = 0; j < filtered_cloud_bot->points.size(); j++)
   {
@@ -206,19 +181,20 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
       centroid1.add(point);
   }
   centroid1.get(center1);
-  bot_publisher.publish(create_marker(center1));
 
   pcl::toROSMsg(*filtered_cloud, output);
-  processed_cloud_publisher.publish(output);
+  processed_plane_cloud_publisher.publish(output);
 
+  pcl::toROSMsg(*filtered_cloud_bot, output);
+  processed_bot_cloud_publisher.publish(output);
 
-    //Moment of Inertia
-  pcl::MomentOfInertiaEstimation <pcl::PointXYZI> feature_extractor;
-  feature_extractor.setInputCloud (filtered_cloud);
-  feature_extractor.compute ();
+  //Moment of Inertia
+  pcl::MomentOfInertiaEstimation<pcl::PointXYZI> feature_extractor;
+  feature_extractor.setInputCloud(filtered_cloud);
+  feature_extractor.compute();
 
-  std::vector <float> moment_of_inertia;
-  std::vector <float> eccentricity;
+  std::vector<float> moment_of_inertia;
+  std::vector<float> eccentricity;
 
   pcl::PointXYZI min_point_OBB;
   pcl::PointXYZI max_point_OBB;
@@ -228,20 +204,52 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
   Eigen::Vector3f major_vector, middle_vector, minor_vector;
   Eigen::Vector3f mass_center;
 
-  feature_extractor.getMomentOfInertia (moment_of_inertia);
-  feature_extractor.getEccentricity (eccentricity);
-  feature_extractor.getOBB (min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
-  feature_extractor.getEigenValues (major_value, middle_value, minor_value);
-  feature_extractor.getEigenVectors (major_vector, middle_vector, minor_vector);
-  feature_extractor.getMassCenter (mass_center);
+  feature_extractor.getMomentOfInertia(moment_of_inertia);
+  feature_extractor.getEccentricity(eccentricity);
+  feature_extractor.getOBB(min_point_OBB, max_point_OBB, position_OBB, rotational_matrix_OBB);
+  feature_extractor.getEigenValues(major_value, middle_value, minor_value);
+  feature_extractor.getEigenVectors(major_vector, middle_vector, minor_vector);
+  feature_extractor.getMassCenter(mass_center);
 
-  Eigen::Vector3f position (position_OBB.x, position_OBB.y, position_OBB.z);
-  Eigen::Quaternionf quat (rotational_matrix_OBB);
-   
+  Eigen::Vector3f position(position_OBB.x, position_OBB.y, position_OBB.z);
+  Eigen::Quaternionf quat(rotational_matrix_OBB);
+
+  if (center1.x != 0.0 && center1.y != 0.0 && center1.z != 0.0)
+  {
+    geometry_msgs::PoseStamped APose;
+    APose.header.stamp = ros::Time::now();
+    APose.header.frame_id = "velodyne";
+    APose.pose.position.x = center1.x;
+    APose.pose.position.y = center1.y;
+    APose.pose.position.z = center1.z;
+    APose.pose.orientation.x = 0.0;
+    APose.pose.orientation.y = 0.0;
+    APose.pose.orientation.z = 0.0;
+    APose.pose.orientation.w = 1.0;
+    agent_pose.publish(APose);
+    bot_marker_pub.publish(create_marker(center1));
+  }
+
+  if (center.x != 0.0 && center.y != 0.0 && center.z != 0.0)
+  {
+    geometry_msgs::PoseStamped PPose;
+    PPose.header.stamp = ros::Time::now();
+    PPose.header.frame_id = "velodyne";
+    PPose.pose.position.x = position_OBB.x;
+    PPose.pose.position.y = position_OBB.y;
+    PPose.pose.position.z = position_OBB.z;
+    PPose.pose.orientation.x = quat.x();
+    PPose.pose.orientation.y = quat.y();
+    PPose.pose.orientation.z = quat.z();
+    PPose.pose.orientation.w = quat.w();
+    pallet_pose.publish(PPose);
+    pallet_marker_publisher.publish(create_marker(center));
+  }
+
   //Visualisation Marker
-  std::string ns; 
-  float r; 
-  float g; 
+  std::string ns;
+  float r;
+  float g;
   float b;
   visualization_msgs::MarkerArray msg_marker;
   visualization_msgs::Marker bbx_marker;
@@ -250,11 +258,11 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
   bbx_marker.ns = ns;
   bbx_marker.type = visualization_msgs::Marker::CUBE;
   bbx_marker.action = visualization_msgs::Marker::ADD;
-  bbx_marker.pose.position.x =  position_OBB.x;
-  bbx_marker.pose.position.y =  position_OBB.y;
-  bbx_marker.pose.position.z =  position_OBB.z;
-  bbx_marker.pose.orientation.x = 0.0; //quat.x();
-  bbx_marker.pose.orientation.y = 0.0; //quat.y();
+  bbx_marker.pose.position.x = position_OBB.x;
+  bbx_marker.pose.position.y = position_OBB.y;
+  bbx_marker.pose.position.z = position_OBB.z;
+  bbx_marker.pose.orientation.x = quat.x();
+  bbx_marker.pose.orientation.y = quat.y();
   bbx_marker.pose.orientation.z = quat.z();
   bbx_marker.pose.orientation.w = quat.w();
   bbx_marker.scale.x = (max_point_OBB.x - min_point_OBB.x);
@@ -266,9 +274,7 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
   bbx_marker.color.a = 0.4;
   bbx_marker.lifetime = ros::Duration();
   msg_marker.markers.push_back(bbx_marker);
-  markers_pub_.publish(msg_marker);
-
-
+  plane_marker_pub.publish(msg_marker);
 }
 
 void callback(lidar_object_detection::parametersConfig &config, uint32_t level)
@@ -283,9 +289,6 @@ void callback(lidar_object_detection::parametersConfig &config, uint32_t level)
   sor_StddevMulThresh = config.sor_StddevMulThresh;
   sor_meanK = config.sor_meanK;
   normal_esitmator_KSearch = config.normal_esitmator_KSearch;
-  ClusterMinSize = config.ClusterMinSize;
-  ClusterMaxSize = config.ClusterMaxSize;
-  ClusterNumberOfNeighbours = config.ClusterNumberOfNeighbours;
   SACDistanceThreshold = config.SACDistanceThreshold;
 }
 
@@ -310,13 +313,16 @@ int main(int argc, char **argv)
 
   ros::Subscriber input_cloud_subscriber = nh.subscribe("/velodyne_points", 1, cloud_cb);
 
-  processed_cloud_publisher = nh.advertise<sensor_msgs::PointCloud2>("output", 1);
+  processed_plane_cloud_publisher = nh.advertise<sensor_msgs::PointCloud2>("plane_object", 1);
+  processed_bot_cloud_publisher = nh.advertise<sensor_msgs::PointCloud2>("agent_object", 1);
   primary_filter_publisher = nh.advertise<sensor_msgs::PointCloud2>("primary_output", 1);
-  plane_filter_publisher = nh.advertise<sensor_msgs::PointCloud2>("plane_output", 1);
-  bot_filter_publisher = nh.advertise<sensor_msgs::PointCloud2>("bot_output", 1);
-  marker_publisher = nh.advertise<visualization_msgs::Marker>("pallet_centroid", 1);
-  bot_publisher = nh.advertise<visualization_msgs::Marker>("other_bot", 1);
-  markers_pub_ = nh.advertise<visualization_msgs::MarkerArray> ("msg_marker", 100);
+
+  pallet_marker_publisher = nh.advertise<visualization_msgs::Marker>("pallet_centroid", 1);
+  bot_marker_pub = nh.advertise<visualization_msgs::Marker>("other_agent", 1);
+  plane_marker_pub = nh.advertise<visualization_msgs::MarkerArray>("plane_marker", 1);
+
+  pallet_pose = nh.advertise<geometry_msgs::PoseStamped>("pallet_pose", 1);
+  agent_pose = nh.advertise<geometry_msgs::PoseStamped>("agent_pose", 1);
 
   ros::ServiceServer service = nh.advertiseService("save_point_cloud", save);
 
