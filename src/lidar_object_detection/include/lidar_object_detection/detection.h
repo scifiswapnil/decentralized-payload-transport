@@ -19,6 +19,7 @@
 #include "pcl_ros/point_cloud.h"
 #include <sensor_msgs/point_cloud_conversion.h>
 #include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 #include <pcl/filters/extract_indices.h>
 #include <vector>
 #include <pcl/point_types.h>
@@ -32,6 +33,7 @@
 #include <std_srvs/Empty.h>
 #include <string.h>
 #include <pcl/io/pcd_io.h>
-
+#include <pcl/segmentation/extract_clusters.h>
 #include <dynamic_reconfigure/server.h>
 #include <lidar_object_detection/parametersConfig.h>
+#include <pcl/features/moment_of_inertia_estimation.h>
