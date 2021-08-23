@@ -4,6 +4,8 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Global Options1
+        - /Jackal01/LaserScan1
         - /TF1/Frames1
       Splitter Ratio: 0.6177685856819153
     Tree Height: 663
@@ -25,7 +27,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PointCloud2
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -161,7 +163,7 @@ Visualization Manager:
           Color: 255; 255; 255
           Color Transformer: Intensity
           Decay Time: 0
-          Enabled: true
+          Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
           Min Color: 0; 0; 0
@@ -176,7 +178,7 @@ Visualization Manager:
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
-          Value: true
+          Value: false
         - Class: rviz/InteractiveMarkers
           Enable Transparency: true
           Enabled: false
@@ -356,7 +358,7 @@ Visualization Manager:
           Queue Size: 10
           Selectable: true
           Size (Pixels): 3
-          Size (m): 0.009999999776482582
+          Size (m): 0.03999999910593033
           Style: Flat Squares
           Topic: /jackal0/laser/scan
           Unreliable: false
@@ -477,6 +479,8 @@ Visualization Manager:
           Value: true
         map:
           Value: true
+        path_frame:
+          Value: true
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -517,6 +521,8 @@ Visualization Manager:
                   {}
                 jackal0/rear_right_wheel_link:
                   {}
+          path_frame:
+            {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -542,6 +548,40 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /path
       Unreliable: false
+      Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz/Pose
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.30000001192092896
+      Head Radius: 0.10000000149011612
+      Name: Pose
+      Queue Size: 10
+      Shaft Length: 1
+      Shaft Radius: 0.05000000074505806
+      Shape: Arrow
+      Topic: /jackal0/move_base_simple/goal
+      Unreliable: false
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /visualization_marker
+      Name: Marker
+      Namespaces:
+        axle point: true
+        control point: true
+        goal point: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /interpolator_viz
+      Name: Marker
+      Namespaces:
+        interpolated: true
+      Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
@@ -570,7 +610,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -0.024999823421239853
+      Angle: 3.079998254776001
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -580,10 +620,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 43.948177337646484
+      Scale: -57.58800506591797
       Target Frame: <Fixed Frame>
-      X: -2.83457612991333
-      Y: -0.06882022321224213
+      X: -1.1972566843032837
+      Y: -1.4559766054153442
     Saved: ~
 Window Geometry:
   Displays:
@@ -602,4 +642,4 @@ Window Geometry:
     collapsed: false
   Width: 1920
   X: 0
-  Y: 1107
+  Y: 27

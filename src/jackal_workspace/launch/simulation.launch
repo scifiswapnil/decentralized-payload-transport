@@ -37,6 +37,7 @@ Description of the jackal workspace for the multi-agent payload transport projec
         <arg name="config_id" value="0" />
         <arg name="x" value="0.15" />
         <arg name="y" value="0.55" />
+        <arg name="use_global_tf"  value="true"/>
     </include>
 
     <!-- keyboard controller -->
@@ -54,7 +55,7 @@ Description of the jackal workspace for the multi-agent payload transport projec
 
     <!-- View in RVIZ. -->
     <group if="$(arg load_map)">
-        <node name="map_server" pkg="map_server" type="map_server" args="$(find jackal_workspace)/map/stage_two.yaml" />
+        <node name="map_server" pkg="map_server" type="map_server" args="$(find jackal_workspace)/map/stage_four.yaml" />
     </group>
 
 </launch>

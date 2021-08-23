@@ -66,28 +66,28 @@
     <sensor type="ray" name="head_laser_sensor">
       <pose>0 0 0 0 0 0</pose>
       <visualize>false</visualize>
-      <update_rate>20</update_rate>
+      <update_rate>15</update_rate>
       <ray>
         <scan>
           <horizontal>
-            <samples>1875</samples>
+            <samples>720</samples>
             <resolution>1</resolution>
-            <min_angle>-3.14</min_angle>
-            <max_angle>3.14</max_angle>
+            <min_angle>-2.9</min_angle>
+            <max_angle>2.9</max_angle>
           </horizontal>
         </scan>
         <range>
-          <min>0.3</min>
-          <max>130.0</max>
+          <min>0.4</min>
+          <max>30.0</max>
           <resolution>0.01</resolution>
         </range>
         <noise>
           <type>gaussian</type>
-          <mean>0.0</mean>
-          <stddev>0.0</stddev>
+          <mean>0.001</mean>
+          <stddev>0.01</stddev>
         </noise>
       </ray>
-      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_gpu_laser.so">
+      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
         <robotNamespace>/$(arg namespace)</robotNamespace>
         <topicName>laser/scan</topicName>
         <frameName>$(arg namespace)/laser</frameName>
