@@ -17,15 +17,38 @@ ros::Publisher pallet_pose, agent_pose;
 pcl::PointCloud<pcl::PointXYZI>::Ptr save_cloud(new pcl::PointCloud<pcl::PointXYZI>);
 int file_pcd_count = 0;
 
-visualization_msgs::Marker create_marker(pcl::PointXYZI center)
+visualization_msgs::Marker create_marker(pcl::PointXYZI center , int type)
 {
   visualization_msgs::Marker marker;
   marker.header.frame_id = "velodyne";
   marker.header.stamp = ros::Time::now();
   marker.ns = "basic_shapes";
   marker.id = 0;
+  if (type == 0)
+  {
   marker.type = visualization_msgs::Marker::SPHERE;
   marker.action = visualization_msgs::Marker::ADD;
+  marker.color.r = 0.0f;
+  marker.color.g = 1.0f;
+  marker.color.b = 0.0f;
+  marker.color.a = 1.0;
+    marker.scale.x = 0.1;
+  marker.scale.y = 0.1;
+  marker.scale.z = 0.1;
+  }
+  if (type == 1)
+  {
+  marker.type = visualization_msgs::Marker::SPHERE;
+  marker.action = visualization_msgs::Marker::ADD;
+  marker.color.r = 1.0f;
+  marker.color.g = 0.0f;
+  marker.color.b = 0.0f;
+  marker.color.a = 1.0;
+  marker.scale.x = 0.1;
+  marker.scale.y = 0.1;
+  marker.scale.z = 0.1;
+  }
+  
   marker.pose.position.x = center.x;
   marker.pose.position.y = center.y;
   marker.pose.position.z = center.z;
@@ -33,13 +56,7 @@ visualization_msgs::Marker create_marker(pcl::PointXYZI center)
   marker.pose.orientation.y = 0.0;
   marker.pose.orientation.z = 0.0;
   marker.pose.orientation.w = 1.0;
-  marker.scale.x = 0.1;
-  marker.scale.y = 0.1;
-  marker.scale.z = 0.1;
-  marker.color.r = 0.0f;
-  marker.color.g = 1.0f;
-  marker.color.b = 0.0f;
-  marker.color.a = 1.0;
+
   marker.lifetime = ros::Duration();
   return marker;
 }
@@ -227,7 +244,7 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
     APose.pose.orientation.z = 0.0;
     APose.pose.orientation.w = 1.0;
     agent_pose.publish(APose);
-    bot_marker_pub.publish(create_marker(center1));
+    bot_marker_pub.publish(create_marker(center1,1));
   }
 
   if (center.x != 0.0 && center.y != 0.0 && center.z != 0.0)
@@ -243,8 +260,19 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
     PPose.pose.orientation.z = quat.z();
     PPose.pose.orientation.w = quat.w();
     pallet_pose.publish(PPose);
-    pallet_marker_publisher.publish(create_marker(center));
+    pallet_marker_publisher.publish(create_marker(center,0));
   }
+
+  geometry_msgs::Quaternion msg;
+  msg.x = quat.x();
+  msg.y = quat.y();
+  msg.z = quat.z();
+  msg.w = quat.w();
+  tf::Quaternion quatex;
+  tf::quaternionMsgToTF(msg, quatex);
+
+  double roll, pitch, yaw;
+  tf::Matrix3x3(quatex).getRPY(roll, pitch, yaw);
 
   //Visualisation Marker
   std::string ns;
@@ -256,22 +284,22 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
   bbx_marker.header.frame_id = "velodyne";
   bbx_marker.header.stamp = ros::Time::now();
   bbx_marker.ns = ns;
-  bbx_marker.type = visualization_msgs::Marker::CUBE;
-  bbx_marker.action = visualization_msgs::Marker::ADD;
+  bbx_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
+  bbx_marker.mesh_resource = "package://jackal_workspace/meshes/trolley.stl";
   bbx_marker.pose.position.x = position_OBB.x;
   bbx_marker.pose.position.y = position_OBB.y;
   bbx_marker.pose.position.z = position_OBB.z;
-  bbx_marker.pose.orientation.x = quat.x();
-  bbx_marker.pose.orientation.y = quat.y();
+  // bbx_marker.pose.orientation.x = quat.x();
+  // bbx_marker.pose.orientation.y = quat.y();
   bbx_marker.pose.orientation.z = quat.z();
   bbx_marker.pose.orientation.w = quat.w();
-  bbx_marker.scale.x = (max_point_OBB.x - min_point_OBB.x);
-  bbx_marker.scale.y = (max_point_OBB.y - min_point_OBB.y);
-  bbx_marker.scale.z = (max_point_OBB.z - min_point_OBB.z);
-  bbx_marker.color.b = b;
-  bbx_marker.color.g = g;
-  bbx_marker.color.r = r;
-  bbx_marker.color.a = 0.4;
+  bbx_marker.scale.x = 0.0008;
+  bbx_marker.scale.y = 0.0008;
+  bbx_marker.scale.z = 0.0008;
+  bbx_marker.color.b = 1.0;
+  bbx_marker.color.g = 0.0;
+  bbx_marker.color.r = 0.0;
+  bbx_marker.color.a = 1.0;
   bbx_marker.lifetime = ros::Duration();
   msg_marker.markers.push_back(bbx_marker);
   plane_marker_pub.publish(msg_marker);

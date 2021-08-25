@@ -32,9 +32,11 @@
 #include <pcl/segmentation/region_growing.h>
 #include <std_srvs/Empty.h>
 #include <string.h>
+#include <tf/tf.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/segmentation/extract_clusters.h>
 #include <dynamic_reconfigure/server.h>
 #include <lidar_object_detection/parametersConfig.h>
 #include <pcl/features/moment_of_inertia_estimation.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <tf/LinearMath/Matrix3x3.h>

@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   dynamic_reconfigure
   std_msgs
+  tf
 )
 
 # find_package(Boost REQUIRED COMPONENTS system)
