@@ -12,7 +12,7 @@ Description of the jackal workspace for the multi-agent payload transport projec
 -->
 <launch>
     <arg name="use_sim_time" default="true" />
-    <arg name="gui" default="false" />
+    <arg name="gui" default="true" />
     <arg name="load_map" default="true" />
     <arg name="rviz" default="true" />
     <arg name="headless" default="false" />

@@ -13,10 +13,21 @@
         <color rgba="1.0 1.0 1.0 1.0" />
     </material>
 
+    <gazebo>
+        <plugin name="nexus_custom_force_based_move" filename="libfeedback.so">
+          <commandTopic>cmd_vel</commandTopic>
+          <poseTopic>goal</poseTopic>
+          <odometryTopic>pallet_pose</odometryTopic>
+          <odometryFrame>map</odometryFrame>
+          <odometryRate>30.0</odometryRate>
+          <robotBaseFrame>pallet</robotBaseFrame>
+        </plugin>   
+     </gazebo>
+
     <link name="pallet">
         <inertial>
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
-            <mass value="10.0" />
+            <mass value="5.0" />
             <inertia ixx="2.43" ixy="0.0" ixz="0.0" iyy="1.10" iyz="0.0" izz="3.47" />
         </inertial>
         <visual>
@@ -48,8 +59,8 @@
         <parent link="pallet" />
         <child link="connector_robot_one" />
         <axis xyz="0.0 0.0 1.0" />
-        <dynamics damping="1.0" friction="5.0" />
-        <limit lower="-3.1" upper="3.1" effort="100.0" velocity="10.0" />
+        <dynamics damping="0.5" friction="1.0" />
+        <limit lower="-3.1" upper="3.1" effort="10.0" velocity="10.0" />
     </joint>
 
     <link name="straigth_bar_one">
@@ -68,8 +79,8 @@
         <parent link="connector_robot_one" />
         <child link="straigth_bar_one" />
         <axis xyz="1.0 0.0 0.0" />
-        <dynamics damping="10.0" friction="100.0" />
-        <limit lower="-0.5" upper="0.7" effort="1000.0" velocity="10.0" />
+        <dynamics damping="0.5" friction="1.0" />
+        <limit lower="-0.5" upper="0.7" effort="10.0" velocity="10.0" />
     </joint>
 
     <link name="connector_bar_one">
@@ -87,8 +98,8 @@
         <parent link="straigth_bar_one" />
         <child link="connector_bar_one" />
         <axis xyz="0.0 0.0 1.0" />
-        <dynamics damping="1.0" friction="5.0" />
-        <limit lower="-3.1" upper="3.1" effort="100.0" velocity="10.0" />
+        <dynamics damping="0.5" friction="1.0" />
+        <limit lower="-3.1" upper="3.1" effort="10.0" velocity="10.0" />
     </joint>
 
 
@@ -107,8 +118,8 @@
         <parent link="pallet" />
         <child link="connector_robot_two" />
         <axis xyz="0.0 0.0 1.0" />
-        <dynamics damping="1.0" friction="5.0" />
-        <limit lower="-3.1" upper="3.1" effort="100.0" velocity="10.0" />
+        <dynamics damping="0.5" friction="1.0" />
+        <limit lower="-3.1" upper="3.1" effort="10.0" velocity="10.0" />
     </joint>
 
     <link name="straigth_bar_two">
@@ -126,8 +137,8 @@
         <parent link="connector_robot_two" />
         <child link="straigth_bar_two" />
         <axis xyz="1.0 0.0 0.0" />
-        <dynamics damping="10.0" friction="100.0" />
-        <limit lower="-0.5" upper="0.7" effort="1000.0" velocity="10.0" />
+        <dynamics damping="0.5" friction="1.0" />
+        <limit lower="-0.5" upper="0.7" effort="10.0" velocity="10.0" />
     </joint>
 
     <link name="connector_bar_two">
@@ -145,8 +156,8 @@
         <parent link="straigth_bar_two" />
         <child link="connector_bar_two" />
         <axis xyz="0.0 0.0 1.0" />
-        <dynamics damping="1.0" friction="5.0" />
-        <limit lower="-3.1" upper="3.1" effort="100.0" velocity="10.0" />
+        <dynamics damping="0.5" friction="1.0" />
+        <limit lower="-3.1" upper="3.1" effort="10.0" velocity="10.0" />
 
     </joint>
 

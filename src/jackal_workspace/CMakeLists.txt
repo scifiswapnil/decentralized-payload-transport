@@ -12,6 +12,17 @@ find_package(catkin REQUIRED COMPONENTS
   tf
 )
 
+include_directories(${GAZEBO_INCLUDE_DIRS})
+link_directories(${GAZEBO_LIBRARY_DIRS})
+
+find_package(gazebo REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
+include_directories(${GAZEBO_INCLUDE_DIRS})
+link_directories(${GAZEBO_LIBRARY_DIRS})
+
+find_package(Boost REQUIRED COMPONENTS thread)
+include_directories(${Boost_INCLUDE_DIRS})
+
 # find_package(Boost REQUIRED COMPONENTS system)
 
 # catkin_python_setup()
@@ -55,6 +66,10 @@ include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
 )
+
+add_library(feedback src/pallet_feedback.cpp)
+target_link_libraries(feedback ${Boost_LIBRARIES} ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
+
 
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/jackal_workspace.cpp
