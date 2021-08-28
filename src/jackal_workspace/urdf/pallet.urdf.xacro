@@ -64,11 +64,11 @@
     </joint>
 
     <link name="straigth_bar_one">
-        <xacro:inertial_cuboid mass="1.0" x_length="1.5" y_length="0.01" z_length="0.01" />
+        <xacro:inertial_cuboid mass="1.0" x_length="0.6" y_length="0.01" z_length="0.01" />
         <visual>
-            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <origin xyz="0.3 0.0 0.0" rpy="0.0 0.0 0.0" />
             <geometry>
-                <box size="1.5 0.01 0.01" />
+                <box size="0.6 0.01 0.01" />
             </geometry>
             <material name="dark_grey" />
         </visual>
@@ -80,7 +80,7 @@
         <child link="straigth_bar_one" />
         <axis xyz="1.0 0.0 0.0" />
         <dynamics damping="0.5" friction="1.0" />
-        <limit lower="-0.5" upper="0.7" effort="10.0" velocity="10.0" />
+        <limit lower="-0.6" upper="0.0" effort="10.0" velocity="10.0" />
     </joint>
 
     <link name="connector_bar_one">
@@ -94,7 +94,7 @@
         </visual>
     </link>
     <joint name="connector_bar_one_joint" type="revolute">
-        <origin xyz="0.75 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <origin xyz="0.6 0.0 0.0" rpy="0.0 0.0 0.0" />
         <parent link="straigth_bar_one" />
         <child link="connector_bar_one" />
         <axis xyz="0.0 0.0 1.0" />
@@ -123,11 +123,11 @@
     </joint>
 
     <link name="straigth_bar_two">
-        <xacro:inertial_cuboid mass="1.0" x_length="1.5" y_length="0.01" z_length="0.01" />
+        <xacro:inertial_cuboid mass="1.0" x_length="0.6" y_length="0.01" z_length="0.01" />
         <visual>
-            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <origin xyz="0.3 0.0 0.0" rpy="0.0 0.0 0.0" />
             <geometry>
-                <box size="1.5 0.01 0.01" />
+                <box size="0.6 0.01 0.01" />
             </geometry>
             <material name="dark_grey" />
         </visual>
@@ -138,7 +138,7 @@
         <child link="straigth_bar_two" />
         <axis xyz="1.0 0.0 0.0" />
         <dynamics damping="0.5" friction="1.0" />
-        <limit lower="-0.5" upper="0.7" effort="10.0" velocity="10.0" />
+        <limit lower="-0.6" upper="0.0" effort="10.0" velocity="10.0" />
     </joint>
 
     <link name="connector_bar_two">
@@ -152,7 +152,7 @@
         </visual>
     </link>
     <joint name="connector_bar_two_joint" type="revolute">
-        <origin xyz="0.75 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <origin xyz="0.6 0.0 0.0" rpy="0.0 0.0 0.0" />
         <parent link="straigth_bar_two" />
         <child link="connector_bar_two" />
         <axis xyz="0.0 0.0 1.0" />

@@ -11,22 +11,21 @@ Description of the jackal workspace for the multi-agent payload transport projec
 
 -->
 <launch>
-    
+
     <rosparam param="jackal1/jackal_velocity_controller/left_wheel">[jackal1/front_left_wheel, jackal1/rear_left_wheel] </rosparam>
     <rosparam param="jackal1/jackal_velocity_controller/right_wheel">[jackal1/front_right_wheel, jackal1/rear_right_wheel]</rosparam>
 
     <include file="$(find multi_jackal_base)/launch/jackal_base.launch">
         <arg name="ns" value="jackal1" />
+        <arg name="ons" value="jackal0" />
         <arg name="config" value="sheffield_robots" />
         <arg name="config_id" value="1" />
-        <arg name="x" value="0.15" />
-        <arg name="y" value="-0.55" />
-        <arg name="use_global_tf"  value="true"/>
+        <arg name="x" value="-0.55" />
+        <arg name="y" value="-1.2" />
+        <arg name="yaw" value="-1.57" />
+        <arg name="use_global_tf" value="true" />
     </include>
 
-    <!-- keyboard controller -->
-    <node name="robot1_teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen" launch-prefix="xterm -e">
-        <remap to="/jackal1/jackal_velocity_controller/cmd_vel" from="cmd_vel" />
-    </node>
 
+    <!-- <node name="connector" type="connector.py" pkg="jackal_workspace" output="screen"/> -->
 </launch>
