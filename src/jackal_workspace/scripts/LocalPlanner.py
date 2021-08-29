@@ -326,7 +326,7 @@ def path_callback(data):
             agent_loc = a.local_coordinate_convert(coo)
             if (done):
                 forces = 0
-                forces = forces + a.compute_repulsive_force(objects = [localpallet,agent_loc],influence_radius = 2, repulsive_coef = 3.0)
+                forces = forces + a.compute_repulsive_force(objects = [localpallet,agent_loc],influence_radius = 2, repulsive_coef = 2.0)
                 forces = forces + a.compute_attractive_force(goal = localtarget, influence_radius = 3, coef=1.5)
                 route = a.gradient_planner(forces,[200,200])
 #                 viz_plot = a.visualize_forces(forces)
