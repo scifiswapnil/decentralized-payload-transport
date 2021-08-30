@@ -389,12 +389,18 @@ def callbackgoal(data):
             f, u = interpolate.splprep([Sdecomp_X,Sdecomp_Y],s=0.05,k=1)
         else :
             f, u = interpolate.splprep([Sdecomp_X,Sdecomp_Y],s=0.05,k=2)
-        xsmooth, ysmooth = interpolate.splev(np.linspace(0, 1.0, len(Sdecomp_X)*3), f)
+        xsmooth, ysmooth = interpolate.splev(np.linspace(0, 1.0, len(Sdecomp_X)*5), f)
         ros_path = np.vstack((xsmooth,ysmooth))
         
+        tt=[]
+        for i in range(len(ros_path[0])):
+            if (mapdata[int(ros_path[1][i]),int(ros_path[0][i])] > 0):
+                tt.append([ros_path[0][i],ros_path[1][i]])
+        ttt = np.array(tt) 
+    
 #         plt.figure(figsize=(10,10))
 #         plt.imshow(mapdata+orgmapdata)
-#         plt.plot(ros_path[0],ros_path[1],'bo--',linewidth=1, markersize=5)
+#         plt.plot(ttt[:,0],ttt[:,1],'bo--',linewidth=1, markersize=5)
 #         plt.plot(decomp_X,decomp_Y,'go--',linewidth=1, markersize=5)
 #         plt.plot(Sdecomp_X,Sdecomp_Y,'ro--',linewidth=1, markersize=5)
 #         plt.show()
@@ -402,15 +408,16 @@ def callbackgoal(data):
         rrtsmoothpath = Path()
         rrtsmoothpath.header.frame_id = "map"
         rrtsmoothpath.header.stamp = rospy.Time.now()
-        for i in range(1,len(ros_path[0])+1):
+        for i in range(1,len(ttt[:,0])+1):
             pose = PoseStamped()
-            ans = grid2meters([ros_path[0][-i],ros_path[1][-i]])
+            ans = grid2meters([ttt[-i][0],ttt[-i][1]])
             pose.header = rrtsmoothpath.header
             pose.pose.position.x = ans[0] 
             pose.pose.position.y = ans[1]
             pose.pose.orientation.w = 1
             rrtsmoothpath.poses.append(pose)            
         path_pub.publish(rrtsmoothpath)
+
 
 rospy.init_node('GlobalPlanner', anonymous=True)
 path_pub = rospy.Publisher('global_path', Path, queue_size=10)

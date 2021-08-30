@@ -354,8 +354,8 @@ def path_callback(data):
         a.extract_local_path(globalpath)
         localtarget , globalpath= a.extract_immediate_goal(globalpath)
         forces = 0
-        forces = forces + a.compute_repulsive_force(objects = objects_in_region,influence_radius = 2, repulsive_coef = 2.0)
-        forces = forces + a.compute_attractive_force(goal = localtarget, influence_radius = 3, coef=1.5)
+        forces = forces + a.compute_repulsive_force(objects = objects_in_region,influence_radius = 2, repulsive_coef = 1.0)
+        forces = forces + a.compute_attractive_force(goal = localtarget, influence_radius = 10, coef=2.5)
         route = a.gradient_planner(forces,[200,200])
         
         viz_plot = a.visualize_forces(forces)
