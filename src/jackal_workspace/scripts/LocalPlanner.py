@@ -354,8 +354,8 @@ def path_callback(data):
         a.extract_local_path(globalpath)
         localtarget , globalpath= a.extract_immediate_goal(globalpath)
         forces = 0
-        forces = forces + a.compute_repulsive_force(objects = objects_in_region,influence_radius = 2, repulsive_coef = 1.0)
-        forces = forces + a.compute_attractive_force(goal = localtarget, influence_radius = 10, coef=2.5)
+        forces = forces + a.compute_repulsive_force(objects = objects_in_region,influence_radius = 1.8, repulsive_coef = 1.5)
+        forces = forces + a.compute_attractive_force(goal = localtarget, influence_radius = 6, coef=1.5)
         route = a.gradient_planner(forces,[200,200])
         
         viz_plot = a.visualize_forces(forces)
@@ -374,7 +374,7 @@ def path_callback(data):
         xx, yy = np.mgrid[0:400, 0:400]
         fig = plt.figure(figsize=(10,10))
         ax = fig.add_subplot(111, projection='3d')
-        ax.view_init(elev=75, azim=325)
+        ax.view_init(elev=55, azim=345)
         ax.plot_surface(xx, yy, forces,cmap=cm.coolwarm,linewidth=0, antialiased=False,alpha=.4)
         ax.plot(route[:,1],route[:,0],"go--",linewidth=3,markersize=10,label="Local Path")
         ax.plot(a.get_local_path()[:,1],a.get_local_path()[:,0],"bo--",linewidth=3,markersize=10,label="Global Path")

@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<robot name="pallet" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:macro name="inertial_cuboid" params="mass x_length y_length z_length">
+        <inertial>
+            <mass value="${mass}" />
+            <origin xyz="0 0 0" />
+            <inertia ixx="${(1/12) * mass * (y_length*y_length + z_length*z_length)}" ixy="0.0" ixz="0.0" iyy="${(1/12) * mass * (x_length*x_length + z_length*z_length)}" iyz="0.0" izz="${(1/12) * mass * (x_length*x_length + y_length*y_length)}" />
+        </inertial>
+    </xacro:macro>
+
+    <material name="dark_grey">
+        <color rgba="1.0 1.0 1.0 1.0" />
+    </material>
+
+    <gazebo>
+        <plugin name="nexus_custom_force_based_move" filename="libfeedback.so">
+          <commandTopic>cmd_vel</commandTopic>
+          <poseTopic>goal</poseTopic>
+          <odometryTopic>pallet_pose</odometryTopic>
+          <odometryFrame>map</odometryFrame>
+          <odometryRate>30.0</odometryRate>
+          <robotBaseFrame>pallet</robotBaseFrame>
+        </plugin>   
+     </gazebo>
+
+    <link name="pallet">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <mass value="5.0" />
+            <inertia ixx="2.43" ixy="0.0" ixz="0.0" iyy="1.10" iyz="0.0" izz="3.47" />
+        </inertial>
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <geometry>
+                <mesh filename="package://jackal_workspace/urdf/pallet.dae" scale="0.1 0.1 0.1" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <geometry>
+                <mesh filename="package://jackal_workspace/urdf/pallet.dae" scale="0.1 0.1 0.1" />
+            </geometry>
+        </collision>
+    </link>
+
+    <link name="connector_robot_one">
+        <xacro:inertial_cuboid mass="1.0" x_length="0.05" y_length="0.05" z_length="0.05" />
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <geometry>
+                <box size="0.05 0.05 0.05" />
+            </geometry>
+            <material name="dark_grey" />
+        </visual>
+    </link>
+    <joint name="connector_robot_one_joint" type="revolute">
+        <origin xyz="0.35 0.0 0.1" rpy="0.0 0.0 0.0" />
+        <parent link="pallet" />
+        <child link="connector_robot_one" />
+        <axis xyz="0.0 0.0 1.0" />
+        <dynamics damping="0.5" friction="1.0" />
+        <limit lower="-3.1" upper="3.1" effort="10.0" velocity="10.0" />
+    </joint>
+
+    <link name="straigth_bar_one">
+        <xacro:inertial_cuboid mass="1.0" x_length="0.6" y_length="0.01" z_length="0.01" />
+        <visual>
+            <origin xyz="0.3 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <geometry>
+                <box size="0.6 0.01 0.01" />
+            </geometry>
+            <material name="dark_grey" />
+        </visual>
+    </link>
+
+    <joint name="straigth_bar_one_joint" type="prismatic">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <parent link="connector_robot_one" />
+        <child link="straigth_bar_one" />
+        <axis xyz="1.0 0.0 0.0" />
+        <dynamics damping="0.5" friction="1.0" />
+        <limit lower="-0.6" upper="0.0" effort="10.0" velocity="10.0" />
+    </joint>
+
+    <link name="connector_bar_one">
+        <xacro:inertial_cuboid mass="1.0" x_length="0.05" y_length="0.05" z_length="0.05" />
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+            <geometry>
+                <box size="0.05 0.05 0.05" />
+            </geometry>
+            <material name="dark_grey" />
+        </visual>
+    </link>
+    <joint name="connector_bar_one_joint" type="revolute">
+        <origin xyz="0.6 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <parent link="straigth_bar_one" />
+        <child link="connector_bar_one" />
+        <axis xyz="0.0 0.0 1.0" />
+        <dynamics damping="0.5" friction="1.0" />
+        <limit lower="-3.1" upper="3.1" effort="10.0" velocity="10.0" />
+    </joint>
+
+</robot>
