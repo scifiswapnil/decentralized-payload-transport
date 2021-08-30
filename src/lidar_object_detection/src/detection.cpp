@@ -44,9 +44,9 @@ visualization_msgs::Marker create_marker(pcl::PointXYZI center , int type)
   marker.color.g = 0.0f;
   marker.color.b = 0.0f;
   marker.color.a = 1.0;
-  marker.scale.x = 0.1;
-  marker.scale.y = 0.1;
-  marker.scale.z = 0.1;
+  marker.scale.x = 0.2;
+  marker.scale.y = 0.2;
+  marker.scale.z = 0.2;
   }
   
   marker.pose.position.x = center.x;
@@ -233,33 +233,28 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
 
   if (center1.x != 0.0 && center1.y != 0.0 && center1.z != 0.0)
   {
-    geometry_msgs::PoseStamped APose;
-    APose.header.stamp = ros::Time::now();
-    APose.header.frame_id = "velodyne";
-    APose.pose.position.x = center1.x;
-    APose.pose.position.y = center1.y;
-    APose.pose.position.z = center1.z;
-    APose.pose.orientation.x = 0.0;
-    APose.pose.orientation.y = 0.0;
-    APose.pose.orientation.z = 0.0;
-    APose.pose.orientation.w = 1.0;
-    agent_pose.publish(APose);
+    nav_msgs::Odometry agent_odom;
+    agent_odom.header.stamp = ros::Time::now();
+    agent_odom.header.frame_id = "velodyne";
+    agent_odom.pose.pose.position.x = center1.x;
+    agent_odom.pose.pose.position.y = center1.y;
+    agent_odom.pose.pose.position.z = center1.z;
+    agent_odom.pose.pose.orientation.w = 1.0;
+    agent_pose.publish(agent_odom);
     bot_marker_pub.publish(create_marker(center1,1));
   }
 
   if (center.x != 0.0 && center.y != 0.0 && center.z != 0.0)
   {
-    geometry_msgs::PoseStamped PPose;
-    PPose.header.stamp = ros::Time::now();
-    PPose.header.frame_id = "velodyne";
-    PPose.pose.position.x = position_OBB.x;
-    PPose.pose.position.y = position_OBB.y;
-    PPose.pose.position.z = position_OBB.z;
-    PPose.pose.orientation.x = quat.x();
-    PPose.pose.orientation.y = quat.y();
-    PPose.pose.orientation.z = quat.z();
-    PPose.pose.orientation.w = quat.w();
-    pallet_pose.publish(PPose);
+    nav_msgs::Odometry pallet_odom;
+    pallet_odom.header.stamp = ros::Time::now();
+    pallet_odom.header.frame_id = "velodyne";
+    pallet_odom.pose.pose.position.x = position_OBB.x;
+    pallet_odom.pose.pose.position.y = position_OBB.y;
+    pallet_odom.pose.pose.position.z = position_OBB.z;
+    pallet_odom.pose.pose.orientation.z = quat.z();
+    pallet_odom.pose.pose.orientation.w = quat.w();
+    pallet_pose.publish(pallet_odom);
     pallet_marker_publisher.publish(create_marker(center,0));
   }
 
@@ -349,8 +344,8 @@ int main(int argc, char **argv)
   bot_marker_pub = nh.advertise<visualization_msgs::Marker>("other_agent", 1);
   plane_marker_pub = nh.advertise<visualization_msgs::MarkerArray>("plane_marker", 1);
 
-  pallet_pose = nh.advertise<geometry_msgs::PoseStamped>("pallet_pose", 1);
-  agent_pose = nh.advertise<geometry_msgs::PoseStamped>("agent_pose", 1);
+  pallet_pose = nh.advertise<nav_msgs::Odometry>("pallet_pose", 1);
+  agent_pose = nh.advertise<nav_msgs::Odometry>("agent_pose", 1);
 
   ros::ServiceServer service = nh.advertiseService("save_point_cloud", save);
 

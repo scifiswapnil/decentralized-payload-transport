@@ -9,11 +9,14 @@
 # 
 # **Email**       : kalhapure.swapnil@gmail.com
 
-### Imports
+# ## Imports
+
+# In[1]:
 
 
 import rospy
 import cv2
+import time
 import tf2_ros
 import tf2_geometry_msgs
 import numpy as np
@@ -24,16 +27,19 @@ from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Twist
 from scipy.ndimage.morphology import distance_transform_edt as bwdist
 from scipy.ndimage.morphology import grey_dilation
-from IPython.display import display, clear_output
 from scipy.spatial import distance
 from geometry_msgs.msg import PoseStamped
 from tracking_pid.msg import FollowPathActionResult
 from tracking_pid.msg import traj_point
 import warnings
+from matplotlib import cm
 warnings.filterwarnings("ignore", category=RuntimeWarning) 
 
 
-### Global variables
+# ## Global variables
+
+# In[2]:
+
 
 res_remap = 0.04
 
@@ -42,6 +48,7 @@ map_y = 0.0
 map_org_x = 0.0
 map_org_y = 0.0
 map_res = 0.0
+img_no = 0
 
 got_path = False
 goal_results = 0
@@ -49,7 +56,7 @@ goal_results = 0
 mapdata = None
 orgmapdata = None
 
-globalpath = []
+globalpath = np.array([])
 current_odom = None
 agent_current_odom = None
 pallet_pose = None
@@ -57,10 +64,16 @@ pallet_pose = None
 
 # ## Helper functions
 
+# In[3]:
+
+
 def meters2grid(pose_m):
     pose_on_grid = np.array((np.array(pose_m) - [map_org_x, map_org_y])/ map_res)
     pose_on_grid[1] = map_y - pose_on_grid[1] 
     return pose_on_grid
+
+
+# In[4]:
 
 
 def grid2meters(pose_grid):
@@ -72,6 +85,8 @@ def grid2meters(pose_grid):
     return a
 
 
+# In[5]:
+
 
 def get_position_in_grid(odom):
     tfbuffer = tf2_ros.Buffer()
@@ -80,6 +95,9 @@ def get_position_in_grid(odom):
     odom.pose = tf2_geometry_msgs.do_transform_pose(odom.pose, t_a_b)
     resp_odom = meters2grid((odom.pose.pose.position.x, odom.pose.pose.position.y))
     return resp_odom
+
+
+# In[6]:
 
 
 def get_line(x1, y1, x2, y2):
@@ -121,6 +139,9 @@ def get_line(x1, y1, x2, y2):
     return points
 
 
+# In[7]:
+
+
 def path_smoothing(path):
     current_point = 0 
     mapd = mapdata
@@ -145,9 +166,11 @@ def path_smoothing(path):
     return smoothedpath
 
 
-### Controller
+# ## Controller
 
-wholemap = None
+# In[8]:
+
+
 class local_region:
     def __init__(self, origin_x, origin_y, width=200):
         self.org_x = origin_x
@@ -202,15 +225,11 @@ class local_region:
         if (np.min(ans) < 40):
             delete_point = self.global_coordinate_convert(self.path[np.argmin(ans),:])
             ay = np.where(global_path==np.array([[delete_point[0]],[delete_point[1]]]))[1][0] + 1
+            self.target = self.local_coordinate_convert(global_path[:,0])
             global_path = np.delete(global_path,np.s_[0:ay],axis=1)
             self.path = np.delete(self.path, np.argmin(ans),axis=0)
             self.path = np.delete(self.path,np.s_[0:np.argmin(ans)],axis=0)
-        if (globalpath.size > 2):
-            done = True
-            self.target = self.local_coordinate_convert(global_path[:,0])
-        else:
-            done = False
-        return self.target,global_path,done
+        return self.target,global_path
     
     def compute_repulsive_force(self, objects= [[200,200]], influence_radius = 2, repulsive_coef = 100):
         mod_map = np.copy(self.data)
@@ -225,7 +244,7 @@ class local_region:
     def compute_attractive_force(self, goal = [200,200], influence_radius = 0.5,coef = 100.0):
         img = np.ones((400, 400), np.uint8)
         img = img * 255
-        cv2.circle(img, (goal[0],goal[1]), 10, 0, -1)
+        cv2.circle(img, (goal[0],goal[1]), 8, 0, -1)
         bdist = bwdist(img==255)
         bdist2 = (bdist/100.) + 1
         repulsive = -coef * ((1./bdist2 - 1./influence_radius)**2)
@@ -236,7 +255,7 @@ class local_region:
         skip = 5
         sizer = 400
         [x_m, y_m] = np.meshgrid(np.linspace(1, sizer,sizer), np.linspace(1, sizer,sizer))
-        [gy, gx] = np.gradient(force);
+        [gy, gx] = np.gradient(force)
         gx = -gx
         q_stack = x_m[::skip, ::skip], y_m[::skip, ::skip], gx[::skip, ::skip], gy[::skip, ::skip]
         plt.figure(figsize=(15,15))
@@ -245,21 +264,21 @@ class local_region:
         return plt
     
     def gradient_planner (self, force, start_coords):
-        [gy, gx] = np.gradient(-force);
+        [gy, gx] = np.gradient(-force)
         route = np.array([np.array(start_coords)])
         ix = 0
         iy = 0
         max_itr = 0
-        while(((ix < len(gx)-2) and (ix < len(gy)-2)) and max_itr < 15):
-            current_point = route[-1,:];
+        while(((ix < len(gx)-2) and (ix < len(gy)-2)) and max_itr < 25):
+            current_point = route[-1,:]
             if ( not np.isnan(current_point[0]) and not np.isnan(current_point[1])):
                 ix = int( current_point[1] )
                 iy = int( current_point[0] )
                 vx = gx[ix, iy]
                 vy = gy[ix, iy]
-                dt = 1 / np.linalg.norm([vx, vy]);
-                next_point = current_point + dt*np.array( [vx, vy] );
-                route = np.vstack( [route, next_point] ); 
+                dt = 1 / np.linalg.norm([vx, vy])
+                next_point = current_point + dt*np.array( [vx, vy] )
+                route = np.vstack( [route, next_point] ) 
                 max_itr = max_itr + 1 
             else:
                 break
@@ -267,6 +286,9 @@ class local_region:
 
 
 # ## ROS Code
+
+# In[9]:
+
 
 def map_callback(data):
     global mapdata
@@ -300,7 +322,8 @@ def path_callback(data):
     global globalpath
     global current_odom
     global agent_current_odom
-    
+    global img_no
+
     print("Got the Global path")
     globalpath = []
     x = []
@@ -313,38 +336,83 @@ def path_callback(data):
     globalpath.append(x)
     globalpath.append(y)
     globalpath=np.array(globalpath)
+    final_point = globalpath[:,-1]
     while True:
         cmd = traj_point()
         co = get_position_in_grid(current_odom).astype(np.uint16)
-        coo = get_position_in_grid(agent_current_odom).astype(np.uint16)
         a = local_region(co[0],co[1])
-        if (globalpath.size > 1):
-            a.extract_local_path(globalpath)
-            localtarget , globalpath, done= a.extract_immediate_goal(globalpath)
-            localpallet = meters2grid([pallet_pose.pose.pose.position.x, pallet_pose.pose.pose.position.y]).astype(np.uint16)
+        objects_in_region = []
+        if type(None) != type(pallet_pose):
+            localpallet = get_position_in_grid(pallet_pose).astype(np.uint16)
             localpallet = a.local_coordinate_convert(localpallet)
-            agent_loc = a.local_coordinate_convert(coo)
-            if (done):
-                forces = 0
-                forces = forces + a.compute_repulsive_force(objects = [localpallet,agent_loc],influence_radius = 2, repulsive_coef = 2.0)
-                forces = forces + a.compute_attractive_force(goal = localtarget, influence_radius = 3, coef=1.5)
-                route = a.gradient_planner(forces,[200,200])
-#                 viz_plot = a.visualize_forces(forces)
-#                 viz_plot.plot(route[-2,0],route[-2,1],"yo--")
-#                 viz_plot.plot(a.get_local_path()[:,0],a.get_local_path()[:,1],"bo")
-#                 viz_plot.plot(localpallet[0],localpallet[1],"co")
-#                 viz_plot.plot(localtarget[0],localtarget[1],"go")
-#                 viz_plot.plot(agent_loc[0],agent_loc[1],"ro")
-#                 viz_plot.plot(200,200,"ro")
-#                 viz_plot.show()
+            objects_in_region.append(localpallet)
+        
+        if type(None) != type(agent_current_odom):
+            other_agent = get_position_in_grid(agent_current_odom).astype(np.uint16)
+            other_agent = a.local_coordinate_convert(other_agent)
+            objects_in_region.append(other_agent)
+        a.extract_local_path(globalpath)
+        localtarget , globalpath= a.extract_immediate_goal(globalpath)
+        forces = 0
+        forces = forces + a.compute_repulsive_force(objects = objects_in_region,influence_radius = 2, repulsive_coef = 2.0)
+        forces = forces + a.compute_attractive_force(goal = localtarget, influence_radius = 3, coef=1.5)
+        route = a.gradient_planner(forces,[200,200])
+        
+        viz_plot = a.visualize_forces(forces)
+        viz_plot.plot(route[:,0],route[:,1],"go--",linewidth=3,markersize=10,label="Local Path")
+        viz_plot.plot(a.get_local_path()[:,0],a.get_local_path()[:,1],"bo--",linewidth=3,markersize=10,label="Global Path")
+        if type(None) != type(pallet_pose):
+            viz_plot.plot(localpallet[0],localpallet[1],"co",markersize=15,label="Pallet")
+        viz_plot.plot(localtarget[0],localtarget[1],"mo",markersize=15,label="Local Target")
+        if type(None) != type(agent_current_odom):
+            viz_plot.plot(other_agent[0],other_agent[1],"ro",markersize=15,label="Other agent")
+        viz_plot.plot(200,200,"rX",markersize=15,label="Robot")
+        viz_plot.legend(loc="upper left",labelspacing=1,prop={'weight':'bold'},facecolor="w",framealpha=1)
+        img_no = img_no + 1
+        viz_plot.savefig("/home/scifiswapnil/Desktop/jackal_ws/log/2dplot_"+str(img_no)+".png")
+
+        xx, yy = np.mgrid[0:400, 0:400]
+        fig = plt.figure(figsize=(10,10))
+        ax = fig.add_subplot(111, projection='3d')
+        ax.view_init(elev=75, azim=325)
+        ax.plot_surface(xx, yy, forces,cmap=cm.coolwarm,linewidth=0, antialiased=False,alpha=.4)
+        ax.plot(route[:,1],route[:,0],"go--",linewidth=3,markersize=10,label="Local Path")
+        ax.plot(a.get_local_path()[:,1],a.get_local_path()[:,0],"bo--",linewidth=3,markersize=10,label="Global Path")
+        if type(None) != type(pallet_pose):
+            ax.plot(localpallet[1],localpallet[0],"co",markersize=15,label="Pallet")
+        ax.plot(localtarget[1],localtarget[0],"mo",markersize=15,label="Local Target")
+        if type(None) != type(agent_current_odom):
+            ax.plot(other_agent[1],other_agent[0],"ro",markersize=15,label="Other agent")
+        ax.plot(200,200,"rX",markersize=15,label="Robot")
+        ax.legend(loc="upper left",labelspacing=1,prop={'weight':'bold'},facecolor="w",framealpha=1)
+        plt.savefig("/home/scifiswapnil/Desktop/jackal_ws/log/3dplot_"+str(img_no)+".png")
+
+        cmd.pose.header.frame_id = "map"
+        op = grid2meters(a.global_coordinate_convert(route[-2,:]))
+        cmd.pose.pose.position.x = op[0]
+        cmd.pose.pose.position.y = op[1]
+        trajectory_pub.publish(cmd)
+        if(globalpath.size > 0):
+            continue
+        else:
+            testco = get_position_in_grid(current_odom).astype(np.uint16)
+            final_path_array = get_line(testco[0],testco[1],final_point[0],final_point[1])
+            for i in range(5,len(final_path_array),3):
+                # co = get_position_in_grid(current_odom).astype(np.uint16)
+                # a = local_region(co[0],co[1])
+                # ty = a.local_coordinate_convert(final_path_array[-1])
+                # forces = 0
+                # forces = forces + a.compute_repulsive_force(objects = objects_in_region,influence_radius = 2, repulsive_coef = 2.0)
+                # forces = forces + a.compute_attractive_force(goal = ty, influence_radius = 3, coef=1.5)
                 cmd.pose.header.frame_id = "map"
-                op = grid2meters(a.global_coordinate_convert(route[-2,:]))
+                op = grid2meters(final_path_array[i])
                 cmd.pose.pose.position.x = op[0]
                 cmd.pose.pose.position.y = op[1]
                 trajectory_pub.publish(cmd)
-            else:
-                print("goal done")
-                break
+                time.sleep(0.3)
+            break
+        
+
 
 
 def odom_callback(data):
@@ -359,7 +427,7 @@ def pallet_odom_callback(data):
     global pallet_pose
     pallet_pose = data
 
-rospy.init_node('LocalPlanner', anonymous=True)
+rospy.init_node('LocalPlanner')
 rospy.Subscriber("/map", OccupancyGrid, map_callback)
 rospy.Subscriber("global_path", Path, path_callback)
 rospy.Subscriber("/odometry", Odometry, odom_callback)
