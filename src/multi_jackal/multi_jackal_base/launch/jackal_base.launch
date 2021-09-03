@@ -46,11 +46,11 @@
       <remap from="/odometry" to="/$(arg ns)/odometry/local_filtered" />
       </node>
 
-    <node name="local_planner" pkg="jackal_workspace" type="LocalPlanner.py" output="screen">
+    <!-- <node name="local_planner" pkg="jackal_workspace" type="LocalPlanner.py" output="screen">
       <remap from="/other_agent" to="/$(arg ons)/odometry/local_filtered" />
       <remap from="/odometry" to="/$(arg ns)/odometry/local_filtered" />
       <remap from="/pallet_pose" to="/pallet_pose" />
-    </node>
+    </node> -->
 
     <node name="$(arg ns)_controller" pkg="tracking_pid" type="controller" output="screen">
       <remap from="move_base/cmd_vel" to="/$(arg ns)/jackal_velocity_controller/cmd_vel" />

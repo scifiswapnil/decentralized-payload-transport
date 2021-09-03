@@ -231,10 +231,22 @@ class local_region:
             self.path = np.delete(self.path,np.s_[0:np.argmin(ans)],axis=0)
         return self.target,global_path
     
-    def compute_repulsive_force(self, objects= [[200,200]], influence_radius = 2, repulsive_coef = 100):
+    def compute_map_repulsive_force(self, influence_radius = 2, repulsive_coef = 100):
         mod_map = np.copy(self.data)
+        bdist = bwdist(mod_map==255)
+        bdist2 = (bdist/100.) + 1
+        repulsive = repulsive_coef*((1./bdist2 - 1./influence_radius)**2)
+        repulsive [bdist2 > influence_radius] = 0
+        return repulsive
+
+    def compute_repulsive_force(self, objects= [[200,200]], influence_radius = 2, repulsive_coef = 100):
+#         mod_map = np.copy(self.data)
+        mod_map = np.ones((400, 400), np.uint8)
+        mod_map = mod_map * 255
         for i in range(len(objects)):
             cv2.circle(mod_map, (objects[i][0],objects[i][1]), 5, 0, -1)
+        if (len(objects) > 1) :
+            cv2.line(mod_map,(objects[0][0],objects[0][1]),(objects[1][0],objects[1][1]),0,20)
         bdist = bwdist(mod_map==255)
         bdist2 = (bdist/100.) + 1
         repulsive = repulsive_coef*((1./bdist2 - 1./influence_radius)**2)
@@ -269,7 +281,7 @@ class local_region:
         ix = 0
         iy = 0
         max_itr = 0
-        while(((ix < len(gx)-2) and (ix < len(gy)-2)) and max_itr < 25):
+        while(((ix < len(gx)-2) and (ix < len(gy)-2)) and max_itr < 15):
             current_point = route[-1,:]
             if ( not np.isnan(current_point[0]) and not np.isnan(current_point[1])):
                 ix = int( current_point[1] )
@@ -354,65 +366,72 @@ def path_callback(data):
         a.extract_local_path(globalpath)
         localtarget , globalpath= a.extract_immediate_goal(globalpath)
         forces = 0
-        forces = forces + a.compute_repulsive_force(objects = objects_in_region,influence_radius = 1.8, repulsive_coef = 1.5)
-        forces = forces + a.compute_attractive_force(goal = localtarget, influence_radius = 6, coef=1.5)
-        route = a.gradient_planner(forces,[200,200])
+        forces = forces + a.compute_map_repulsive_force(influence_radius = 1.8, repulsive_coef = 1.5)
+        forces = forces + a.compute_repulsive_force(objects = objects_in_region,influence_radius = 2.8, repulsive_coef = 1.5)
+        forces = forces + a.compute_attractive_force(goal = localtarget, influence_radius = 60, coef=1.1)
+        no_problem = True
+        for i in range (len(objects_in_region)):
+            if((objects_in_region[i][0] - 200)**2 + (objects_in_region[i][1] - 200)**2) >= 50**2:
+                no_problem = False
         
-        viz_plot = a.visualize_forces(forces)
-        viz_plot.plot(route[:,0],route[:,1],"go--",linewidth=3,markersize=10,label="Local Path")
-        viz_plot.plot(a.get_local_path()[:,0],a.get_local_path()[:,1],"bo--",linewidth=3,markersize=10,label="Global Path")
-        if type(None) != type(pallet_pose):
-            viz_plot.plot(localpallet[0],localpallet[1],"co",markersize=15,label="Pallet")
-        viz_plot.plot(localtarget[0],localtarget[1],"mo",markersize=15,label="Local Target")
-        if type(None) != type(agent_current_odom):
-            viz_plot.plot(other_agent[0],other_agent[1],"ro",markersize=15,label="Other agent")
-        viz_plot.plot(200,200,"rX",markersize=15,label="Robot")
-        viz_plot.legend(loc="upper left",labelspacing=1,prop={'weight':'bold'},facecolor="w",framealpha=1)
-        img_no = img_no + 1
-        viz_plot.savefig("/home/scifiswapnil/Desktop/jackal_ws/log/2dplot_"+str(img_no)+".png")
+        if (no_problem):
+            route = a.gradient_planner(forces,[200,200])
+        
+            viz_plot = a.visualize_forces(forces)
+            viz_plot.plot(route[:,0],route[:,1],"go--",linewidth=3,markersize=10,label="Local Path")
+            viz_plot.plot(a.get_local_path()[:,0],a.get_local_path()[:,1],"bo--",linewidth=3,markersize=10,label="Global Path")
+            if type(None) != type(pallet_pose):
+                viz_plot.plot(localpallet[0],localpallet[1],"co",markersize=15,label="Pallet")
+            viz_plot.plot(localtarget[0],localtarget[1],"mo",markersize=15,label="Local Target")
+            if type(None) != type(agent_current_odom):
+                viz_plot.plot(other_agent[0],other_agent[1],"ro",markersize=15,label="Other agent")
+            viz_plot.plot(200,200,"rX",markersize=15,label="Robot")
+            viz_plot.legend(loc="upper left",labelspacing=1,prop={'weight':'bold'},facecolor="w",framealpha=1)
+            img_no = img_no + 1
+            viz_plot.savefig("/home/scifiswapnil/Desktop/jackal_ws/log/2dplot_"+str(img_no)+".png")
 
-        xx, yy = np.mgrid[0:400, 0:400]
-        fig = plt.figure(figsize=(10,10))
-        ax = fig.add_subplot(111, projection='3d')
-        ax.view_init(elev=55, azim=345)
-        ax.plot_surface(xx, yy, forces,cmap=cm.coolwarm,linewidth=0, antialiased=False,alpha=.4)
-        ax.plot(route[:,1],route[:,0],"go--",linewidth=3,markersize=10,label="Local Path")
-        ax.plot(a.get_local_path()[:,1],a.get_local_path()[:,0],"bo--",linewidth=3,markersize=10,label="Global Path")
-        if type(None) != type(pallet_pose):
-            ax.plot(localpallet[1],localpallet[0],"co",markersize=15,label="Pallet")
-        ax.plot(localtarget[1],localtarget[0],"mo",markersize=15,label="Local Target")
-        if type(None) != type(agent_current_odom):
-            ax.plot(other_agent[1],other_agent[0],"ro",markersize=15,label="Other agent")
-        ax.plot(200,200,"rX",markersize=15,label="Robot")
-        ax.legend(loc="upper left",labelspacing=1,prop={'weight':'bold'},facecolor="w",framealpha=1)
-        plt.savefig("/home/scifiswapnil/Desktop/jackal_ws/log/3dplot_"+str(img_no)+".png")
+            xx, yy = np.mgrid[0:400, 0:400]
+            fig = plt.figure(figsize=(10,10))
+            ax = fig.add_subplot(111, projection='3d')
+            ax.view_init(elev=55, azim=345)
+            ax.plot_surface(xx, yy, forces,cmap=cm.coolwarm,linewidth=0, antialiased=False,alpha=.4)
+            ax.plot(route[:,1],route[:,0],"go--",linewidth=3,markersize=10,label="Local Path")
+            ax.plot(a.get_local_path()[:,1],a.get_local_path()[:,0],"bo--",linewidth=3,markersize=10,label="Global Path")
+            if type(None) != type(pallet_pose):
+                ax.plot(localpallet[1],localpallet[0],"co",markersize=15,label="Pallet")
+            ax.plot(localtarget[1],localtarget[0],"mo",markersize=15,label="Local Target")
+            if type(None) != type(agent_current_odom):
+                ax.plot(other_agent[1],other_agent[0],"ro",markersize=15,label="Other agent")
+            ax.plot(200,200,"rX",markersize=15,label="Robot")
+            ax.legend(loc="upper left",labelspacing=1,prop={'weight':'bold'},facecolor="w",framealpha=1)
+            plt.savefig("/home/scifiswapnil/Desktop/jackal_ws/log/3dplot_"+str(img_no)+".png")
 
-        cmd.pose.header.frame_id = "map"
-        op = grid2meters(a.global_coordinate_convert(route[-2,:]))
-        cmd.pose.pose.position.x = op[0]
-        cmd.pose.pose.position.y = op[1]
-        trajectory_pub.publish(cmd)
-        if(globalpath.size > 0):
-            continue
+            cmd.pose.header.frame_id = "map"
+            op = grid2meters(a.global_coordinate_convert(route[-2,:]))
+            cmd.pose.pose.position.x = op[0]
+            cmd.pose.pose.position.y = op[1]
+            trajectory_pub.publish(cmd)
+            if(globalpath.size > 0):
+                continue
+            else:
+                testco = get_position_in_grid(current_odom).astype(np.uint16)
+                final_path_array = get_line(testco[0],testco[1],final_point[0],final_point[1])
+                for i in range(5,len(final_path_array),3):
+                    # co = get_position_in_grid(current_odom).astype(np.uint16)
+                    # a = local_region(co[0],co[1])
+                    # ty = a.local_coordinate_convert(final_path_array[-1])
+                    # forces = 0
+                    # forces = forces + a.compute_repulsive_force(objects = objects_in_region,influence_radius = 2, repulsive_coef = 2.0)
+                    # forces = forces + a.compute_attractive_force(goal = ty, influence_radius = 3, coef=1.5)
+                    cmd.pose.header.frame_id = "map"
+                    op = grid2meters(final_path_array[i])
+                    cmd.pose.pose.position.x = op[0]
+                    cmd.pose.pose.position.y = op[1]
+                    trajectory_pub.publish(cmd)
+                    time.sleep(0.3)
+                break
         else:
-            testco = get_position_in_grid(current_odom).astype(np.uint16)
-            final_path_array = get_line(testco[0],testco[1],final_point[0],final_point[1])
-            for i in range(5,len(final_path_array),3):
-                # co = get_position_in_grid(current_odom).astype(np.uint16)
-                # a = local_region(co[0],co[1])
-                # ty = a.local_coordinate_convert(final_path_array[-1])
-                # forces = 0
-                # forces = forces + a.compute_repulsive_force(objects = objects_in_region,influence_radius = 2, repulsive_coef = 2.0)
-                # forces = forces + a.compute_attractive_force(goal = ty, influence_radius = 3, coef=1.5)
-                cmd.pose.header.frame_id = "map"
-                op = grid2meters(final_path_array[i])
-                cmd.pose.pose.position.x = op[0]
-                cmd.pose.pose.position.y = op[1]
-                trajectory_pub.publish(cmd)
-                time.sleep(0.3)
-            break
-        
-
+            print("outside region")
 
 
 def odom_callback(data):

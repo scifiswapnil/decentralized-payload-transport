@@ -262,7 +262,7 @@ class RRT:
             rnd = self.Node(self.end.x, self.end.y)
         return rnd
 
-    def draw_graph(self, drawthis, rnd=None):
+    def draw_graph(self, drawthis=None, rnd=None):
         plt.figure(figsize=(10,10))
         plt.clf()
         plt.gcf().canvas.mpl_connect(
@@ -274,7 +274,7 @@ class RRT:
             if node.parent:
                 plt.plot(node.path_x, node.path_y, "-g")
 
-        plt.imshow(drawthis)
+        plt.imshow(self.grid_map)
         plt.plot(self.start.x, self.start.y, "xr")
         plt.plot(self.end.x, self.end.y, "xr")
         plt.grid(True)
