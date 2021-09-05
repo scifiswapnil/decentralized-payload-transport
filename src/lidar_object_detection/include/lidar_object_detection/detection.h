@@ -39,5 +39,4 @@
 #include <lidar_object_detection/parametersConfig.h>
 #include <pcl/features/moment_of_inertia_estimation.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <nav_msgs/Odometry.h>
 #include <tf/LinearMath/Matrix3x3.h>

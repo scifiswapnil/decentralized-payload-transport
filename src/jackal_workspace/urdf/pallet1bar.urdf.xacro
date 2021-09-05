@@ -59,7 +59,7 @@
         <parent link="pallet" />
         <child link="connector_robot_one" />
         <axis xyz="0.0 0.0 1.0" />
-        <dynamics damping="0.5" friction="1.0" />
+        <dynamics damping="0.1" friction="0.5" />
         <limit lower="-3.1" upper="3.1" effort="10.0" velocity="10.0" />
     </joint>
 
@@ -79,7 +79,7 @@
         <parent link="connector_robot_one" />
         <child link="straigth_bar_one" />
         <axis xyz="1.0 0.0 0.0" />
-        <dynamics damping="0.5" friction="1.0" />
+        <dynamics damping="0.1" friction="0.5" />
         <limit lower="-0.6" upper="0.0" effort="10.0" velocity="10.0" />
     </joint>
 
@@ -98,7 +98,7 @@
         <parent link="straigth_bar_one" />
         <child link="connector_bar_one" />
         <axis xyz="0.0 0.0 1.0" />
-        <dynamics damping="0.5" friction="1.0" />
+        <dynamics damping="0.1" friction="0.5" />
         <limit lower="-3.1" upper="3.1" effort="10.0" velocity="10.0" />
     </joint>
 

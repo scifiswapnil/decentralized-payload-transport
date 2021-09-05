@@ -419,7 +419,7 @@ def callbackgoal(data):
         path_pub.publish(rrtsmoothpath)
 
 
-rospy.init_node('GlobalPlanner', anonymous=True)
+rospy.init_node('GlobalPlanner')
 path_pub = rospy.Publisher('global_path', Path, queue_size=10)
 rospy.Subscriber("/map", OccupancyGrid, map_callback)
 rospy.Subscriber("/odometry", Odometry, callbackodom)

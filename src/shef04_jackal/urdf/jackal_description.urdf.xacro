@@ -62,7 +62,7 @@
   <joint name="$(arg namespace)/velodyne_joint" type="fixed">
     <parent link="$(arg namespace)/front_mount" />
     <child link="$(arg namespace)/laser" />
-    <origin xyz="0 0 0.08" />
+    <origin xyz="0 0 0.08" rpy="0 0 0"/>
   </joint>
 
 

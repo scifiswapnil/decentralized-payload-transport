@@ -12,7 +12,7 @@ Description of the jackal workspace for the multi-agent payload transport projec
 -->
 <launch>
     <arg name="use_sim_time" default="true" />
-    <arg name="gui" default="false" />
+    <arg name="gui" default="true" />
     <arg name="load_map" default="true" />
     <arg name="rviz" default="true" />
     <arg name="headless" default="false" />
@@ -34,23 +34,24 @@ Description of the jackal workspace for the multi-agent payload transport projec
     <!-- Spawn the robots. -->
     <include file="$(find multi_jackal_base)/launch/jackal_base.launch">
         <arg name="ns" value="jackal0" />
-        <arg name="ons" value="jackal1" />
+        <arg name="ons1" value="jackal1" />
+        <arg name="ons2" value="jackal2" />
         <arg name="config" value="sheffield_robots" />
         <arg name="config_id" value="0" />
-        <arg name="x" value="0.0" />
+        <arg name="x" value="0.55" />
         <arg name="y" value="-1.2" />
         <arg name="yaw" value="-1.57" />
         <arg name="use_global_tf" value="true" />
     </include>
 
-    <param name="robot_description" command="$(find xacro)/xacro  $(find jackal_workspace)/urdf/pallet1bar.urdf.xacro --inorder" />
+    <param name="robot_description" command="$(find xacro)/xacro  $(find jackal_workspace)/urdf/pallet3bar.urdf.xacro --inorder" />
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-urdf -model pallet -param robot_description -x 0 -y 0 -z 0.04 -R 0 -P 0 -Y -1.57" />
 
     <!-- keyboard controller -->
-    <!-- <node name="robot0_teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen" launch-prefix="xterm -e">
+     <node name="robot0_teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen" launch-prefix="xterm -e">
         <remap to="/jackal0/jackal_velocity_controller/cmd_vel" from="cmd_vel" />
     </node>
-
+<!-- 
     <node name="robot1_teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen" launch-prefix="xterm -e">
         <remap to="/jackal1/jackal_velocity_controller/cmd_vel" from="cmd_vel" />
     </node> -->

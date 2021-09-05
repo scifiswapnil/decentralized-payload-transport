@@ -7,6 +7,18 @@
   </gazebo>
 
   <gazebo>
+    <plugin name="nexus_custom_force_based_move" filename="libfeedback.so">
+      <!-- <commandTopic>cmd_vel</commandTopic> -->
+      <!-- <poseTopic>goal</poseTopic> -->
+      <odometryTopic>jackal_gazebo_odom</odometryTopic>
+      <odometryFrame>map</odometryFrame>
+      <odometryRate>50.0</odometryRate>
+      <robotBaseFrame>$(arg namespace)/base_link</robotBaseFrame>
+    </plugin>   
+ </gazebo>
+
+
+  <gazebo>
     <plugin name="imu_controller" filename="libhector_gazebo_ros_imu.so">
       <robotNamespace>/$(arg namespace)</robotNamespace>
       <updateRate>5.0</updateRate>
@@ -62,18 +74,18 @@
   </gazebo>
 
 
-  <!-- <gazebo reference="$(arg namespace)/laser">
+  <gazebo reference="$(arg namespace)/laser">
     <sensor type="ray" name="head_laser_sensor">
       <pose>0 0 0 0 0 0</pose>
       <visualize>false</visualize>
-      <update_rate>15</update_rate>
+      <update_rate>30</update_rate>
       <ray>
         <scan>
           <horizontal>
-            <samples>720</samples>
+            <samples>1250</samples>
             <resolution>1</resolution>
-            <min_angle>-2.9</min_angle>
-            <max_angle>2.9</max_angle>
+            <min_angle>-3.14</min_angle>
+            <max_angle>3.14</max_angle>
           </horizontal>
         </scan>
         <range>
@@ -83,8 +95,8 @@
         </range>
         <noise>
           <type>gaussian</type>
-          <mean>0.001</mean>
-          <stddev>0.01</stddev>
+          <mean>0.0</mean>
+          <stddev>0.</stddev>
         </noise>
       </ray>
       <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
@@ -93,7 +105,7 @@
         <frameName>$(arg namespace)/laser</frameName>
       </plugin>
     </sensor>
-  </gazebo> -->
+  </gazebo>
 
   
 </robot>

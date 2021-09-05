@@ -32,6 +32,7 @@ from geometry_msgs.msg import PoseStamped
 from tracking_pid.msg import FollowPathActionResult
 from tracking_pid.msg import traj_point
 import warnings
+from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 warnings.filterwarnings("ignore", category=RuntimeWarning) 
 
@@ -41,7 +42,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 # In[2]:
 
 
-res_remap = 0.04
+res_remap = 0.015
 
 map_x = 0.0
 map_y = 0.0
@@ -58,7 +59,8 @@ orgmapdata = None
 
 globalpath = np.array([])
 current_odom = None
-agent_current_odom = None
+agent_current_odom1 = None
+agent_current_odom2 = None
 pallet_pose = None
 
 
@@ -171,6 +173,7 @@ def path_smoothing(path):
 # In[8]:
 
 
+
 class local_region:
     def __init__(self, origin_x, origin_y, width=200):
         self.org_x = origin_x
@@ -240,16 +243,17 @@ class local_region:
         return repulsive
 
     def compute_repulsive_force(self, objects= [[200,200]], influence_radius = 2, repulsive_coef = 100):
-#         mod_map = np.copy(self.data)
         mod_map = np.ones((400, 400), np.uint8)
         mod_map = mod_map * 255
         for i in range(len(objects)):
-            cv2.circle(mod_map, (objects[i][0],objects[i][1]), 5, 0, -1)
-        if (len(objects) > 1) :
-            cv2.line(mod_map,(objects[0][0],objects[0][1]),(objects[1][0],objects[1][1]),0,20)
+            cv2.circle(mod_map, (objects[i][0],objects[i][1]), 1, 0, -1)
+        pts = np.array(objects,np.int32)
+        pts = pts.reshape((-1,1,2))
+        # cv2.polylines(mod_map,[pts],True,0,12)
+        cv2.fillPoly(mod_map,[pts],0)
         bdist = bwdist(mod_map==255)
         bdist2 = (bdist/100.) + 1
-        repulsive = repulsive_coef*((1./bdist2 - 1./influence_radius)**2)
+        repulsive = repulsive_coef*((1.0/bdist2 - 1.0/influence_radius)**2)
         repulsive [bdist2 > influence_radius] = 0
         return repulsive
     
@@ -296,7 +300,6 @@ class local_region:
                 break
         return route
 
-
 # ## ROS Code
 
 # In[9]:
@@ -333,9 +336,10 @@ def path_callback(data):
     global mapdata
     global globalpath
     global current_odom
-    global agent_current_odom
+    global agent_current_odom1
+    global agent_current_odom2
     global img_no
-
+    global robot_namespace
     print("Got the Global path")
     globalpath = []
     x = []
@@ -359,20 +363,26 @@ def path_callback(data):
             localpallet = a.local_coordinate_convert(localpallet)
             objects_in_region.append(localpallet)
         
-        if type(None) != type(agent_current_odom):
-            other_agent = get_position_in_grid(agent_current_odom).astype(np.uint16)
-            other_agent = a.local_coordinate_convert(other_agent)
-            objects_in_region.append(other_agent)
+        if type(None) != type(agent_current_odom1):
+            other_agent1 = get_position_in_grid(agent_current_odom1).astype(np.uint16)
+            other_agent1 = a.local_coordinate_convert(other_agent1)
+            objects_in_region.append(other_agent1)
+        
+        if type(None) != type(agent_current_odom2):
+            other_agent2 = get_position_in_grid(agent_current_odom2).astype(np.uint16)
+            other_agent2 = a.local_coordinate_convert(other_agent2)
+            objects_in_region.append(other_agent2)
+
         a.extract_local_path(globalpath)
         localtarget , globalpath= a.extract_immediate_goal(globalpath)
         forces = 0
-        forces = forces + a.compute_map_repulsive_force(influence_radius = 1.8, repulsive_coef = 1.5)
-        forces = forces + a.compute_repulsive_force(objects = objects_in_region,influence_radius = 2.8, repulsive_coef = 1.5)
-        forces = forces + a.compute_attractive_force(goal = localtarget, influence_radius = 60, coef=1.1)
+        forces = forces + a.compute_map_repulsive_force(influence_radius = 2.1, repulsive_coef = 4.5)
+        forces = forces + a.compute_repulsive_force(objects = objects_in_region,influence_radius = 6.5,repulsive_coef = 4.5)
+        forces = forces + a.compute_attractive_force(goal = localtarget, influence_radius = 28.5, coef=5.5)
         no_problem = True
-        for i in range (len(objects_in_region)):
-            if((objects_in_region[i][0] - 200)**2 + (objects_in_region[i][1] - 200)**2) >= 50**2:
-                no_problem = False
+        # for i in range (len(objects_in_region)):
+        #     if((objects_in_region[i][0] - 200)**2 + (objects_in_region[i][1] - 200)**2) >= 80**2:
+        #         no_problem = False
         
         if (no_problem):
             route = a.gradient_planner(forces,[200,200])
@@ -383,28 +393,30 @@ def path_callback(data):
             if type(None) != type(pallet_pose):
                 viz_plot.plot(localpallet[0],localpallet[1],"co",markersize=15,label="Pallet")
             viz_plot.plot(localtarget[0],localtarget[1],"mo",markersize=15,label="Local Target")
-            if type(None) != type(agent_current_odom):
-                viz_plot.plot(other_agent[0],other_agent[1],"ro",markersize=15,label="Other agent")
+            if type(None) != type(agent_current_odom1):
+                viz_plot.plot(other_agent1[0],other_agent1[1],"ro",markersize=15,label="Other agent")
+            if type(None) != type(agent_current_odom2):
+                viz_plot.plot(other_agent2[0],other_agent2[1],"ro",markersize=15,label="Other agent")
             viz_plot.plot(200,200,"rX",markersize=15,label="Robot")
             viz_plot.legend(loc="upper left",labelspacing=1,prop={'weight':'bold'},facecolor="w",framealpha=1)
             img_no = img_no + 1
-            viz_plot.savefig("/home/scifiswapnil/Desktop/jackal_ws/log/2dplot_"+str(img_no)+".png")
+            viz_plot.savefig("/home/shivam/Desktop/Multi-agent-payload-transport-master/log/"+str(robot_namespace)+"/2dplot_"+str(img_no)+".png")
 
             xx, yy = np.mgrid[0:400, 0:400]
             fig = plt.figure(figsize=(10,10))
-            ax = fig.add_subplot(111, projection='3d')
+            ax = fig.gca(projection='3d')#fig.add_subplot(111, projection='3d')
             ax.view_init(elev=55, azim=345)
             ax.plot_surface(xx, yy, forces,cmap=cm.coolwarm,linewidth=0, antialiased=False,alpha=.4)
             ax.plot(route[:,1],route[:,0],"go--",linewidth=3,markersize=10,label="Local Path")
             ax.plot(a.get_local_path()[:,1],a.get_local_path()[:,0],"bo--",linewidth=3,markersize=10,label="Global Path")
-            if type(None) != type(pallet_pose):
-                ax.plot(localpallet[1],localpallet[0],"co",markersize=15,label="Pallet")
-            ax.plot(localtarget[1],localtarget[0],"mo",markersize=15,label="Local Target")
-            if type(None) != type(agent_current_odom):
-                ax.plot(other_agent[1],other_agent[0],"ro",markersize=15,label="Other agent")
-            ax.plot(200,200,"rX",markersize=15,label="Robot")
+            # if type(None) != type(pallet_pose):
+            #     ax.plot(localpallet[1],localpallet[0],"co",markersize=15,label="Pallet")
+            # ax.plot(localtarget[1],localtarget[0],"mo",markersize=15,label="Local Target")
+            # if type(None) != type(agent_current_odom1):
+            #     ax.plot(other_agent[1],other_agent[0],"ro",markersize=15,label="Other agent")
+            # ax.plot(200,200,"rX",markersize=15,label="Robot")
             ax.legend(loc="upper left",labelspacing=1,prop={'weight':'bold'},facecolor="w",framealpha=1)
-            plt.savefig("/home/scifiswapnil/Desktop/jackal_ws/log/3dplot_"+str(img_no)+".png")
+            plt.savefig("/home/shivam/Desktop/Multi-agent-payload-transport-master/log/"+str(robot_namespace)+"/3dplot_"+str(img_no)+".png")
 
             cmd.pose.header.frame_id = "map"
             op = grid2meters(a.global_coordinate_convert(route[-2,:]))
@@ -427,7 +439,7 @@ def path_callback(data):
                     op = grid2meters(final_path_array[i])
                     cmd.pose.pose.position.x = op[0]
                     cmd.pose.pose.position.y = op[1]
-                    trajectory_pub.publish(cmd)
+                    # trajectory_pub.publish(cmd)
                     time.sleep(0.3)
                 break
         else:
@@ -438,9 +450,13 @@ def odom_callback(data):
     global current_odom
     current_odom = data
 
-def agent_odom_callback(data):
-    global agent_current_odom
-    agent_current_odom = data
+def agent_odom_callback1(data):
+    global agent_current_odom1
+    agent_current_odom1 = data
+
+def agent_odom_callback2(data):
+    global agent_current_odom2
+    agent_current_odom2 = data
 
 def pallet_odom_callback(data):
     global pallet_pose
@@ -450,7 +466,10 @@ rospy.init_node('LocalPlanner')
 rospy.Subscriber("/map", OccupancyGrid, map_callback)
 rospy.Subscriber("global_path", Path, path_callback)
 rospy.Subscriber("/odometry", Odometry, odom_callback)
-rospy.Subscriber("/other_agent", Odometry, agent_odom_callback)
+rospy.Subscriber("/other_agent1", Odometry, agent_odom_callback1)
+rospy.Subscriber("/other_agent2", Odometry, agent_odom_callback2)
 rospy.Subscriber("/pallet_pose", Odometry, pallet_odom_callback)
 trajectory_pub = rospy.Publisher("trajectory", traj_point, queue_size=1)
+robot_namespace = rospy.get_param("~robot_namespace")
+
 rospy.spin()

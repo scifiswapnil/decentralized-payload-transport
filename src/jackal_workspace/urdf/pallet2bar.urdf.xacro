@@ -44,6 +44,30 @@
         </collision>
     </link>
 
+    <link name="box">
+        <inertial>
+            <origin xyz="0.0 0.0 0.5" rpy="0.0 0.0 0.0" />
+            <mass value="5.0" />
+            <inertia ixx="2.43" ixy="0.0" ixz="0.0" iyy="1.10" iyz="0.0" izz="3.47" />
+        </inertial>
+        <visual>
+            <origin xyz="0.0 0.0 0.2" rpy="0.0 0.0 0.0" />
+            <geometry>
+                <box size="0.5 1.0 0.4"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="box_pallet" type="fixed">
+        <origin xyz="0.0 0.0 0.1" rpy="0.0 0.0 0.0" />
+        <parent link="pallet" />
+        <child link="box" />
+        <axis xyz="0.0 0.0 1.0" />
+        <dynamics damping="0.1" friction="0.5" />
+        <limit lower="-3.1" upper="3.1" effort="10.0" velocity="10.0" />
+    </joint>
+
+
     <link name="connector_robot_one">
         <xacro:inertial_cuboid mass="1.0" x_length="0.05" y_length="0.05" z_length="0.05" />
         <visual>
@@ -59,7 +83,7 @@
         <parent link="pallet" />
         <child link="connector_robot_one" />
         <axis xyz="0.0 0.0 1.0" />
-        <dynamics damping="0.5" friction="1.0" />
+        <dynamics damping="0.1" friction="0.5" />
         <limit lower="-3.1" upper="3.1" effort="10.0" velocity="10.0" />
     </joint>
 
@@ -79,7 +103,7 @@
         <parent link="connector_robot_one" />
         <child link="straigth_bar_one" />
         <axis xyz="1.0 0.0 0.0" />
-        <dynamics damping="0.5" friction="1.0" />
+        <dynamics damping="0.1" friction="0.5" />
         <limit lower="-0.6" upper="0.0" effort="10.0" velocity="10.0" />
     </joint>
 
@@ -98,7 +122,7 @@
         <parent link="straigth_bar_one" />
         <child link="connector_bar_one" />
         <axis xyz="0.0 0.0 1.0" />
-        <dynamics damping="0.5" friction="1.0" />
+        <dynamics damping="0.1" friction="0.5" />
         <limit lower="-3.1" upper="3.1" effort="10.0" velocity="10.0" />
     </joint>
 
@@ -118,7 +142,7 @@
         <parent link="pallet" />
         <child link="connector_robot_two" />
         <axis xyz="0.0 0.0 1.0" />
-        <dynamics damping="0.5" friction="1.0" />
+        <dynamics damping="0.1" friction="0.5" />
         <limit lower="-3.1" upper="3.1" effort="10.0" velocity="10.0" />
     </joint>
 
@@ -137,7 +161,7 @@
         <parent link="connector_robot_two" />
         <child link="straigth_bar_two" />
         <axis xyz="1.0 0.0 0.0" />
-        <dynamics damping="0.5" friction="1.0" />
+        <dynamics damping="0.1" friction="0.5" />
         <limit lower="-0.6" upper="0.0" effort="10.0" velocity="10.0" />
     </joint>
 
@@ -156,7 +180,7 @@
         <parent link="straigth_bar_two" />
         <child link="connector_bar_two" />
         <axis xyz="0.0 0.0 1.0" />
-        <dynamics damping="0.5" friction="1.0" />
+        <dynamics damping="0.1" friction="0.5" />
         <limit lower="-3.1" upper="3.1" effort="10.0" velocity="10.0" />
 
     </joint>

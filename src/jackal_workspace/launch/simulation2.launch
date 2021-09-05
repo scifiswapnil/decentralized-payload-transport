@@ -12,17 +12,17 @@ Description of the jackal workspace for the multi-agent payload transport projec
 -->
 <launch>
 
-    <rosparam param="jackal1/jackal_velocity_controller/left_wheel">[jackal1/front_left_wheel, jackal1/rear_left_wheel] </rosparam>
-    <rosparam param="jackal1/jackal_velocity_controller/right_wheel">[jackal1/front_right_wheel, jackal1/rear_right_wheel]</rosparam>
+    <rosparam param="jackal2/jackal_velocity_controller/left_wheel">[jackal2/front_left_wheel, jackal2/rear_left_wheel] </rosparam>
+    <rosparam param="jackal2/jackal_velocity_controller/right_wheel">[jackal2/front_right_wheel, jackal2/rear_right_wheel]</rosparam>
 
     <!-- Spawn the robots. -->
     <include file="$(find multi_jackal_base)/launch/jackal_base.launch">
-        <arg name="ns" value="jackal1" />
+        <arg name="ns" value="jackal2" />
         <arg name="ons1" value="jackal0" />
-        <arg name="ons2" value="jackal2" />
+        <arg name="ons2" value="jackal1" />
         <arg name="config" value="sheffield_robots" />
         <arg name="config_id" value="0" />
-        <arg name="x" value="0.0" />
+        <arg name="x" value="-0.55" />
         <arg name="y" value="-1.2" />
         <arg name="yaw" value="-1.57" />
         <arg name="use_global_tf" value="true" />
