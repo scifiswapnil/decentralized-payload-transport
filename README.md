@@ -1,4 +1,4 @@
-# Multi-agent-payload-transport
+# Decentralized Payload Transport by swarm of mobile robots
 
 **Aim**: To evalute and design a decentralized cooperative planning strategy for large payload transport in a swarm.
 
