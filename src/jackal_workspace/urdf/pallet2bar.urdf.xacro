@@ -165,7 +165,7 @@
         <limit lower="-0.6" upper="0.0" effort="10.0" velocity="10.0" />
     </joint>
 
-    <link name="connector_bar_two">
+    <link name="connector_bar_three">
         <xacro:inertial_cuboid mass="1.0" x_length="0.05" y_length="0.05" z_length="0.05" />
         <visual>
             <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
@@ -175,10 +175,10 @@
             <material name="dark_grey" />
         </visual>
     </link>
-    <joint name="connector_bar_two_joint" type="revolute">
+    <joint name="connector_bar_three_joint" type="revolute">
         <origin xyz="0.6 0.0 0.0" rpy="0.0 0.0 0.0" />
         <parent link="straigth_bar_two" />
-        <child link="connector_bar_two" />
+        <child link="connector_bar_three" />
         <axis xyz="0.0 0.0 1.0" />
         <dynamics damping="0.1" friction="0.5" />
         <limit lower="-3.1" upper="3.1" effort="10.0" velocity="10.0" />

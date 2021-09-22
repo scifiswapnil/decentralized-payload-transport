@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<!--
+
+MIT License Agreement
+
+Description of the jackal workspace for the multi-agent payload transport project.
+
+\authors Swapnil Kalhapure <kalhapure.swapnil@gmail.com>
+
+\maintainer Swapnil Kalhapure <kalhapure.swapnil@gmail.com>
+
+-->
+<launch>
+    <arg name="use_sim_time" default="true" />
+    <arg name="gui" default="true" />
+    <arg name="load_map" default="true" />
+    <arg name="rviz" default="true" />
+    <arg name="headless" default="false" />
+    <arg name="world_name" default="$(find jackal_workspace)/world/stage_one.world" />
+    <arg name="node_start_delay" default="10.0" />  
+
+    <rosparam param="jackal0/jackal_velocity_controller/left_wheel">[jackal0/front_left_wheel, jackal0/rear_left_wheel] </rosparam>
+    <rosparam param="jackal0/jackal_velocity_controller/right_wheel">[jackal0/front_right_wheel, jackal0/rear_right_wheel]</rosparam>
+    <rosparam param="jackal1/jackal_velocity_controller/left_wheel">[jackal1/front_left_wheel, jackal1/rear_left_wheel] </rosparam>
+    <rosparam param="jackal1/jackal_velocity_controller/right_wheel">[jackal1/front_right_wheel, jackal1/rear_right_wheel]</rosparam>
+
+    <!-- Launch Gazebo with the specified world -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="debug" value="0" />
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="use_sim_time" value="$(arg use_sim_time)" />
+        <arg name="headless" value="$(arg headless)" />
+        <arg name="world_name" value="$(arg world_name)" />
+    </include>
+
+
+    <!-- Spawn the robots. -->
+    <include file="$(find multi_jackal_base)/launch/jackal_base.launch">
+        <arg name="ns" value="jackal0" />
+        <arg name="ons1" value="jackal1" />
+        <arg name="ons2" value="jackal2" />
+        <arg name="config" value="sheffield_robots" />
+        <arg name="config_id" value="0" />
+        <arg name="x" value="0.55" />
+        <arg name="y" value="-1.2" />
+        <arg name="yaw" value="-1.57" />
+        <arg name="use_global_tf" value="true" />
+        <arg name="nav" value="true" />
+    </include>
+
+    <include file="$(find multi_jackal_base)/launch/jackal_base.launch">
+        <arg name="ns" value="jackal1" />
+        <arg name="ons1" value="jackal0" />
+        <arg name="ons2" value="jackal2" />
+        <arg name="config" value="sheffield_robots" />
+        <arg name="config_id" value="0" />
+        <arg name="x" value="-0.55" />
+        <arg name="y" value="-1.2" />
+        <arg name="yaw" value="-1.57" />
+        <arg name="use_global_tf" value="true" />
+        <arg name="nav" value="true" />
+    </include> 
+
+
+    <param name="robot_description" command="$(find xacro)/xacro  $(find jackal_workspace)/urdf/pallet2bar.urdf.xacro --inorder" />
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-urdf -model pallet -param robot_description -x 0 -y 0 -z 0.04 -R 0 -P 0 -Y -1.57" />
+
+    <!-- keyboard controller -->
+    <node name="robot0_teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen" launch-prefix="xterm -e">
+        <remap to="/jackal0/jackal_velocity_controller/cmd_vel" from="cmd_vel" />
+    </node>
+
+    <node name="robot1_teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen" launch-prefix="xterm -e">
+        <remap to="/jackal1/jackal_velocity_controller/cmd_vel" from="cmd_vel" />
+    </node>
+
+    <!-- View in RVIZ. -->
+    <group if="$(arg rviz)">
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find jackal_workspace)/rviz/rviz.rviz">
+            <!-- <remap from="/move_base_simple/goal" to="/jackal0/move_base_simple/goal" /> -->
+        </node>
+    </group>
+
+    <node name="connector" pkg="jackal_workspace" type="Connector.py" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' " />
+
+    <!-- View in RVIZ. -->
+    <group if="$(arg load_map)">
+        <node name="map_server" pkg="map_server" type="map_server" args="$(find jackal_workspace)/map/stage_four.yaml" />
+    </group>
+
+</launch>

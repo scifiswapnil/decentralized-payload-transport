@@ -1,6 +1,6 @@
 <sdf version='1.7'>
   <world name='default'>
-    <plugin name="ros_link_attacher_plugin" filename="libgazebo_ros_link_attacher.so"/>
+    <plugin name='ros_link_attacher_plugin' filename='libgazebo_ros_link_attacher.so'/>
     <light name='sun' type='directional'>
       <cast_shadows>1</cast_shadows>
       <pose>0 0 10 0 -0 0</pose>
@@ -653,58 +653,6 @@
         <kinematic>0</kinematic>
       </link>
       <pose>-2.37329 -1.80744 0 0 -0 0</pose>
-    </model>
-    <model name='euro_pallet'>
-      <link name='link'>
-        <pose>0 0 0 0 -0 0</pose>
-        <inertial>
-          <mass>20</mass>
-          <inertia>
-            <ixx>2.43</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>1.1</iyy>
-            <iyz>0</iyz>
-            <izz>3.47</izz>
-          </inertia>
-          <pose>0 0 0 0 -0 0</pose>
-        </inertial>
-        <collision name='collision'>
-          <pose>0 0 0.05 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <uri>model://euro_pallet/meshes/pallet.dae</uri>
-              <scale>0.1 0.1 0.1</scale>
-            </mesh>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <visual name='visual'>
-          <pose>0 0 0.05 0 -0 0</pose>
-          <geometry>
-            <mesh>
-              <uri>model://euro_pallet/meshes/pallet.dae</uri>
-              <scale>0.1 0.1 0.1</scale>
-            </mesh>
-          </geometry>
-        </visual>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-      <pose>-0.159823 -5.73501 0 0 -0 0</pose>
     </model>
     <model name='ladder_60deg_0rails'>
       <static>1</static>
@@ -1847,10 +1795,10 @@
       <pose>-1.60326 2.27894 0 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>285 869000000</sim_time>
-      <real_time>70 277629058</real_time>
-      <wall_time>1627782287 723900194</wall_time>
-      <iterations>59887</iterations>
+      <sim_time>313 640000000</sim_time>
+      <real_time>27 884263782</real_time>
+      <wall_time>1632277636 526228028</wall_time>
+      <iterations>27771</iterations>
       <model name='cafe_table'>
         <pose>-2.37666 -3.0226 0 0 -0 0</pose>
         <scale>1 1 1</scale>
@@ -1869,16 +1817,6 @@
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='euro_pallet'>
-        <pose>-0.165149 -5.73086 0.072 0 0 -0.013016</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>-0.165149 -5.73086 0.072 0 0 -0.013016</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-2.73291 0.035614 12.3525 -0.765076 -0.260656 -4e-06</acceleration>
-          <wrench>-54.6583 0.712285 247.05 0 -0 0</wrench>
         </link>
       </model>
       <model name='ground_plane'>
@@ -1962,13 +1900,13 @@
         </link>
       </model>
       <model name='person_walking'>
-        <pose>0.138198 5.01658 -1e-06 2e-06 -1e-06 0.00163</pose>
+        <pose>0.138199 5.01658 -1e-06 -2e-06 1e-06 0.002329</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>0.138198 5.01658 -1e-06 2e-06 -1e-06 0.00163</pose>
+          <pose>0.138199 5.01658 -1e-06 -2e-06 1e-06 0.002329</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-0.970276 -2.05309 -2.61855 2.14169 -1.06384 0.106672</acceleration>
-          <wrench>-77.6221 -164.247 -209.484 0 -0 0</wrench>
+          <acceleration>1.03797 2.20317 -2.13415 -2.25732 1.12265 0.105516</acceleration>
+          <wrench>83.0372 176.254 -170.732 0 -0 0</wrench>
         </link>
       </model>
       <model name='table_0'>
@@ -2075,7 +2013,7 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>-9.39844 -10.2329 18.1507 -0 0.823643 0.632198</pose>
+        <pose>-9.40717 -10.221 18.1507 -0 0.823643 0.632198</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>

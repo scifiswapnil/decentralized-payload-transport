@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<!--
+
+MIT License Agreement
+
+Description of the jackal workspace for the multi-agent payload transport project.
+
+\authors Swapnil Kalhapure <kalhapure.swapnil@gmail.com>
+
+\maintainer Swapnil Kalhapure <kalhapure.swapnil@gmail.com>
+
+-->
+<launch>
+    <arg name="use_sim_time" default="true" />
+    <arg name="gui" default="true" />
+    <arg name="load_map" default="true" />
+    <arg name="rviz" default="true" />
+    <arg name="headless" default="false" />
+    <arg name="world_name" default="$(find jackal_workspace)/world/stage_one.world" />
+    <arg name="node_start_delay" default="10.0" />  
+    <arg name="scan_topic" default="/jackal0/laser/scan" />
+
+    <rosparam param="jackal0/jackal_velocity_controller/left_wheel">[jackal0/front_left_wheel, jackal0/rear_left_wheel] </rosparam>
+    <rosparam param="jackal0/jackal_velocity_controller/right_wheel">[jackal0/front_right_wheel, jackal0/rear_right_wheel]</rosparam>
+
+    <!-- Launch Gazebo with the specified world -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="debug" value="0" />
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="use_sim_time" value="$(arg use_sim_time)" />
+        <arg name="headless" value="$(arg headless)" />
+        <arg name="world_name" value="$(arg world_name)" />
+    </include>
+
+
+    <!-- Spawn the robots. -->
+    <include file="$(find multi_jackal_base)/launch/jackal_base.launch">
+        <arg name="ns" value="jackal0" />
+        <arg name="ons1" value="jackal1" />
+        <arg name="ons2" value="jackal2" />
+        <arg name="config" value="sheffield_robots" />
+        <arg name="config_id" value="0" />
+        <arg name="x" value="0.0" />
+        <arg name="y" value="-1.2" />
+        <arg name="yaw" value="-1.57" />
+        <arg name="use_global_tf" value="false" />
+    </include>
+
+    <!-- keyboard controller -->
+     <node name="robot0_teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen" launch-prefix="xterm -e">
+        <remap to="/jackal0/jackal_velocity_controller/cmd_vel" from="cmd_vel" />
+    </node>
+
+
+    <!-- View in RVIZ. -->
+    <group if="$(arg rviz)">
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find jackal_workspace)/rviz/rviz.rviz"/>
+    </group>
+
+    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+  
+        <param name="odom_frame" value="jackal0/odom"/>
+        <param name="base_frame" value="jackal0/base_link"/>
+        <param name="map_frame" value="map"/>
+    
+        <!-- Process 1 out of every this many scans (set it to a higher number to skip more scans)  -->
+        <param name="throttle_scans" value="1"/>
+    
+        <param name="map_update_interval" value="5.0"/> <!-- default: 5.0 -->
+    
+        <!-- The maximum usable range of the laser. A beam is cropped to this value.  -->
+        <param name="maxUrange" value="15.0"/>
+    
+        <!-- The maximum range of the sensor. If regions with no obstacles within the range of the sensor should appear as free space in the map, set maxUrange < maximum range of the real sensor <= maxRange -->
+        <param name="maxRange" value="10.0"/>
+    
+        <param name="sigma" value="0.05"/>
+        <param name="kernelSize" value="1"/>
+        <param name="lstep" value="0.05"/>
+        <param name="astep" value="0.05"/>
+        <param name="iterations" value="5"/>
+        <param name="lsigma" value="0.075"/>
+        <param name="ogain" value="3.0"/>
+        <param name="minimumScore" value="0.0"/>
+        <!-- Number of beams to skip in each scan. -->
+        <param name="lskip" value="0"/>
+    
+        <param name="srr" value="0.01"/>
+        <param name="srt" value="0.02"/>
+        <param name="str" value="0.01"/>
+        <param name="stt" value="0.02"/>
+    
+        <!-- Process a scan each time the robot translates this far  -->
+        <param name="linearUpdate" value="0.1"/>
+    
+        <!-- Process a scan each time the robot rotates this far  -->
+        <param name="angularUpdate" value="0.05"/>
+    
+        <param name="temporalUpdate" value="-1.0"/>
+        <param name="resampleThreshold" value="0.5"/>
+    
+        <!-- Number of particles in the filter. default 30        -->
+        <param name="particles" value="30"/>
+    
+    <!-- Initial map size  -->
+        <param name="xmin" value="-20.0"/>
+        <param name="ymin" value="-20.0"/>
+        <param name="xmax" value="20.0"/>
+        <param name="ymax" value="20.0"/>
+    
+        <!-- Processing parameters (resolution of the map)  -->
+        <param name="delta" value="0.03"/>
+    
+        <param name="llsamplerange" value="0.01"/>
+        <param name="llsamplestep" value="0.01"/>
+        <param name="lasamplerange" value="0.005"/>
+        <param name="lasamplestep" value="0.005"/>
+    
+        <remap from="scan" to="$(arg scan_topic)"/>
+      </node>
+
+</launch>

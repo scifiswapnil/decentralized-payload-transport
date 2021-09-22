@@ -2,6 +2,9 @@ devel/
 logs/
 log/
 build/
+src/jackal_workspace/logdata/jackal0/*.png
+src/jackal_workspace/logdata/jackal1/*.png
+src/jackal_workspace/logdata/jackal2/*.png
 bin/
 lib/
 msg_gen/

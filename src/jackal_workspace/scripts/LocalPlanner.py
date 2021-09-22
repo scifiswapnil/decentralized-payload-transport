@@ -17,6 +17,7 @@
 import rospy
 import cv2
 import time
+import rospkg
 import tf2_ros
 import tf2_geometry_msgs
 import numpy as np
@@ -36,6 +37,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 warnings.filterwarnings("ignore", category=RuntimeWarning) 
 
+rospack = rospkg.RosPack()
 
 # ## Global variables
 
@@ -242,20 +244,26 @@ class local_region:
         repulsive [bdist2 > influence_radius] = 0
         return repulsive
 
-    def compute_repulsive_force(self, objects= [[200,200]], influence_radius = 2, repulsive_coef = 100):
+    def compute_repulsive_force(self, objects, influence_radius = 2, repulsive_coef = 100):
         mod_map = np.ones((400, 400), np.uint8)
+        repulsive = np.zeros((400, 400), np.uint8)
         mod_map = mod_map * 255
-        for i in range(len(objects)):
-            cv2.circle(mod_map, (objects[i][0],objects[i][1]), 1, 0, -1)
-        pts = np.array(objects,np.int32)
-        pts = pts.reshape((-1,1,2))
-        # cv2.polylines(mod_map,[pts],True,0,12)
-        cv2.fillPoly(mod_map,[pts],0)
-        bdist = bwdist(mod_map==255)
-        bdist2 = (bdist/100.) + 1
-        repulsive = repulsive_coef*((1.0/bdist2 - 1.0/influence_radius)**2)
-        repulsive [bdist2 > influence_radius] = 0
-        return repulsive
+        if len(objects) > 0 :
+            for i in range(len(objects)):
+                cv2.circle(mod_map, (objects[i][0],objects[i][1]), 1, 0, -1)
+        
+            pts = np.array(objects,np.int32)
+            pts = pts.reshape((-1,1,2))
+            # cv2.polylines(mod_map,[pts],True,0,12)
+            cv2.fillPoly(mod_map,[pts],0)
+            bdist = bwdist(mod_map==255)
+            bdist2 = (bdist/100.) + 1
+            repulsive = repulsive_coef*((1.0/bdist2 - 1.0/influence_radius)**2)
+            repulsive [bdist2 > influence_radius] = 0
+            return repulsive
+        else :
+            return repulsive
+
     
     def compute_attractive_force(self, goal = [200,200], influence_radius = 0.5,coef = 100.0):
         img = np.ones((400, 400), np.uint8)
@@ -400,8 +408,7 @@ def path_callback(data):
             viz_plot.plot(200,200,"rX",markersize=15,label="Robot")
             viz_plot.legend(loc="upper left",labelspacing=1,prop={'weight':'bold'},facecolor="w",framealpha=1)
             img_no = img_no + 1
-            viz_plot.savefig("/home/shivam/Desktop/Multi-agent-payload-transport-master/log/"+str(robot_namespace)+"/2dplot_"+str(img_no)+".png")
-
+            viz_plot.savefig(rospack.get_path('jackal_workspace') + str("/log/") + str(robot_namespace) + "/2dplot_" + str(img_no) + ".png")
             xx, yy = np.mgrid[0:400, 0:400]
             fig = plt.figure(figsize=(10,10))
             ax = fig.gca(projection='3d')#fig.add_subplot(111, projection='3d')
@@ -416,7 +423,7 @@ def path_callback(data):
             #     ax.plot(other_agent[1],other_agent[0],"ro",markersize=15,label="Other agent")
             # ax.plot(200,200,"rX",markersize=15,label="Robot")
             ax.legend(loc="upper left",labelspacing=1,prop={'weight':'bold'},facecolor="w",framealpha=1)
-            plt.savefig("/home/shivam/Desktop/Multi-agent-payload-transport-master/log/"+str(robot_namespace)+"/3dplot_"+str(img_no)+".png")
+            plt.savefig(rospack.get_path('jackal_workspace') + str("/log/") + str(robot_namespace) + "/3dplot_" + str(img_no) + ".png")
 
             cmd.pose.header.frame_id = "map"
             op = grid2meters(a.global_coordinate_convert(route[-2,:]))
