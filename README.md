@@ -32,8 +32,8 @@ catkin_make
 ```
 ## Instructions
 
-- Run the simulation  - [here](https://github.com/scifiswapnil/decentralized-payload-transport/new/master/src/jackal_workspace/README.md)
-- Run the lidar based object detection - [here](https://github.com/scifiswapnil/decentralized-payload-transport/tree/master/src/lidar_object_detection/README.md)
+- Run the simulation  - [here](https://github.com/scifiswapnil/decentralized-payload-transport/tree/master/src/jackal_workspace)
+- Run the lidar based object detection - [here](https://github.com/scifiswapnil/decentralized-payload-transport/tree/master/src/lidar_object_detection)
 
 ## Todo
 - [x] Multi jackal simulation setup
