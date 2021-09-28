@@ -47,7 +47,9 @@ Description of the jackal workspace for the multi-agent payload transport projec
         <arg name="y" value="-1.2" />
         <arg name="yaw" value="-1.57" />
         <arg name="use_global_tf" value="true" />
-        <arg name="nav" value="true" />
+        <arg name="nav" value="false" />
+        <arg name="track" default="true" />
+        <arg name="off" default="0.55"/>
     </include>
 
     <include file="$(find multi_jackal_base)/launch/jackal_base.launch">
@@ -61,6 +63,7 @@ Description of the jackal workspace for the multi-agent payload transport projec
         <arg name="yaw" value="-1.57" />
         <arg name="use_global_tf" value="true" />
         <arg name="nav" value="true" />
+        <arg name="track" default="false" />
     </include> 
 
     <include file="$(find multi_jackal_base)/launch/jackal_base.launch">
@@ -73,11 +76,14 @@ Description of the jackal workspace for the multi-agent payload transport projec
         <arg name="y" value="-1.2" />
         <arg name="yaw" value="-1.57" />
         <arg name="use_global_tf" value="true" />
-        <arg name="nav" value="true" />
+        <arg name="nav" value="false" />
+        <arg name="track" default="true" />
+        <arg name="off" default="-0.55"/>
     </include> 
 
     <param name="robot_description" command="$(find xacro)/xacro  $(find jackal_workspace)/urdf/pallet3bar.urdf.xacro --inorder" />
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-urdf -model pallet -param robot_description -x 0 -y 0 -z 0.04 -R 0 -P 0 -Y -1.57" />
+    <node name="connector" pkg="jackal_workspace" type="Connector.py" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' " />
 
     <!-- keyboard controller -->
     <node name="robot0_teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen" launch-prefix="xterm -e">
@@ -99,8 +105,6 @@ Description of the jackal workspace for the multi-agent payload transport projec
             <!-- <remap from="/move_base_simple/goal" to="/jackal0/move_base_simple/goal" /> -->
         </node>
     </group>
-
-    <node name="connector" pkg="jackal_workspace" type="Connector.py" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' " />
 
     <!-- View in RVIZ. -->
     <group if="$(arg load_map)">

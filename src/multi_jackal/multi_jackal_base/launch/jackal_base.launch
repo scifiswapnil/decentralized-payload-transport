@@ -22,6 +22,8 @@
   <arg name="gps_rate" default="1" />
   <arg name="gps_drift" default="0.0001" />
   <arg name="nav" default="false" />
+  <arg name="track" default="false" />
+  <arg name="off" default="0.0"/>
 
   <!-- Launch the control portion of the Jackal robot. -->
   <include file="$(find multi_jackal_control)/launch/jackal_control.launch">
@@ -44,29 +46,63 @@
 
   <!-- PID controller -->
   <group ns="$(arg ns)">
-  <group if="$(arg nav)">
-    <node name="global_planner" pkg="jackal_workspace" type="GlobalPlanner.py" output="screen">
-      <remap from="/odometry" to="/$(arg ns)/jackal_gazebo_odom" />
+    <group if="$(arg nav)">
+      <node name="global_planner" pkg="jackal_workspace" type="GlobalPlanner.py" output="screen">
+        <remap from="/odometry" to="/$(arg ns)/jackal_gazebo_odom" />
       </node>
 
-    <node name="local_planner" pkg="jackal_workspace" type="LocalPlanner.py" output="screen">
-      <remap from="/other_agent1" to="/$(arg ons1)/jackal_gazebo_odom" />
-      <remap from="/other_agent2" to="/$(arg ons2)/jackal_gazebo_odom" />
-      <remap from="/odometry" to="/$(arg ns)/jackal_gazebo_odom" />
-      <remap from="/pallet_pose" to="/pallet_pose" />
-      <param name="robot_namespace" value="$(arg ns)"/>
-    </node>
+      <node name="local_planner" pkg="jackal_workspace" type="LocalPlanner.py" output="screen">
+        <remap from="/other_agent1" to="/$(arg ons1)/jackal_gazebo_odom" />
+        <remap from="/other_agent2" to="/$(arg ons2)/jackal_gazebo_odom" />
+        <remap from="/odometry" to="/$(arg ns)/jackal_gazebo_odom" />
+        <remap from="/pallet_pose" to="/pallet_pose" />
+        <param name="robot_namespace" value="$(arg ns)" />
+      </node>
 
-    <node name="$(arg ns)_controller" pkg="tracking_pid" type="controller" output="screen">
-      <remap from="move_base/cmd_vel" to="/$(arg ns)/jackal_velocity_controller/cmd_vel" />
-      <remap from="/path" to="/$(arg ns)/path" />
-      <remap from="local_trajectory" to="/$(arg ns)/trajectory" />
-      <param name="controller_debug_enabled" value="True" />
-      <param name="base_link_frame" value="$(arg ns)/base_link" />
-      <param name="map_frame" value="map" />
-      <param name="l" value="0.05" />
-    </node>
-  </group>
+      <node name="$(arg ns)_controller" pkg="tracking_pid" type="controller" output="screen">
+        <remap from="move_base/cmd_vel" to="/$(arg ns)/jackal_velocity_controller/cmd_vel" />
+        <remap from="/path" to="/$(arg ns)/path" />
+        <remap from="local_trajectory" to="/$(arg ns)/trajectoryy" />
+        <param name="controller_debug_enabled" value="True" />
+        <param name="base_link_frame" value="$(arg ns)/base_link" />
+        <param name="map_frame" value="map" />
+        <param name="l" value="0.05" />
+      </node>
+    </group>
+
+    <group if="$(arg track)">
+      <node name="global_planner" pkg="jackal_workspace" type="GlobalPlanner.py" output="screen">
+        <remap from="/odometry" to="/$(arg ns)/jackal_gazebo_odom" />
+      </node>
+
+      <node name="local_planner" pkg="jackal_workspace" type="LocalPlanner.py" output="screen">
+        <remap from="/other_agent1" to="/$(arg ons1)/jackal_gazebo_odom" />
+        <remap from="/other_agent2" to="/$(arg ons2)/jackal_gazebo_odom" />
+        <remap from="/odometry" to="/$(arg ns)/jackal_gazebo_odom" />
+        <remap from="trajectory" to="shit_topic" />
+        <remap from="/pallet_pose" to="/pallet_pose" />
+        <param name="robot_namespace" value="$(arg ns)" />
+      </node>
+
+      <node name="trackkerbhau" pkg="jackal_workspace" type="straightline.py" output="screen">
+        <remap from="/jackal_gazebo_odom" to="/jackal1/jackal_gazebo_odom" />
+        <remap from="/odom_test" to="/$(arg ns)/odom_test" />
+        <remap from="/trajectory" to="/$(arg ns)/trajectory" />
+        <param name="offset" value="$(arg off)" />
+      </node>
+
+      <node name="$(arg ns)_controller" pkg="tracking_pid" type="controller" output="screen">
+        <remap from="move_base/cmd_vel" to="/$(arg ns)/jackal_velocity_controller/cmd_vel" />
+        <remap from="/path" to="/$(arg ns)/path" />
+        <remap from="local_trajectory" to="/$(arg ns)/trajectory" />
+        <param name="controller_debug_enabled" value="True" />
+        <param name="base_link_frame" value="$(arg ns)/base_link" />
+        <param name="map_frame" value="map" />
+        <param name="l" value="0.05" />
+      </node>
+    </group>
+
+
   </group>
 
   <!-- Start the jackal navigation. -->
